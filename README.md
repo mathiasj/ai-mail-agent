@@ -81,6 +81,92 @@ See `.env.example` for all required variables:
 | `STRIPE_SECRET_KEY` | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
 
+## Service Setup
+
+### Gmail OAuth Credentials
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project (or select an existing one)
+3. Enable the **Gmail API**:
+   - Navigate to **APIs & Services → Library**
+   - Search for "Gmail API" and click **Enable**
+4. Configure the OAuth consent screen:
+   - Go to **APIs & Services → OAuth consent screen**
+   - Choose **External** user type
+   - Fill in app name, support email, and developer contact
+   - Add scopes: `gmail.readonly`, `gmail.send`, `gmail.compose`
+   - Add test users (your Gmail addresses) while in testing mode
+5. Create OAuth credentials:
+   - Go to **APIs & Services → Credentials**
+   - Click **Create Credentials → OAuth client ID**
+   - Application type: **Web application**
+   - Add authorized redirect URI: `http://localhost:3005/api/auth/gmail/callback`
+   - Copy the **Client ID** and **Client Secret**
+6. Update `.env`:
+   ```
+   GMAIL_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   GMAIL_CLIENT_SECRET=your-client-secret
+   GMAIL_REDIRECT_URI=http://localhost:3005/api/auth/gmail/callback
+   ```
+
+### Google Cloud Pub/Sub (Gmail Webhooks)
+
+Gmail uses Pub/Sub to push real-time notifications when new emails arrive.
+
+1. Enable the **Cloud Pub/Sub API** in your Google Cloud project:
+   - Navigate to **APIs & Services → Library**
+   - Search for "Cloud Pub/Sub API" and click **Enable**
+2. Create a Pub/Sub topic:
+   - Go to **Pub/Sub → Topics**
+   - Click **Create Topic**
+   - Topic ID: `gmail-push`
+   - Note the full topic name: `projects/YOUR_PROJECT_ID/topics/gmail-push`
+3. Grant Gmail publish permissions:
+   - On the topic page, click **Show Info Panel → Permissions**
+   - Click **Add Principal**
+   - Principal: `gmail-api-push@system.gserviceaccount.com`
+   - Role: **Pub/Sub Publisher**
+4. Create a subscription:
+   - Go to **Pub/Sub → Subscriptions**
+   - Click **Create Subscription**
+   - Subscription ID: `gmail-push-sub`
+   - Select the `gmail-push` topic
+   - Delivery type: **Push**
+   - Endpoint URL: `https://YOUR_DOMAIN/webhooks/gmail` (must be HTTPS — use [ngrok](https://ngrok.com/) for local dev: `ngrok http 3005`)
+5. Update `.env`:
+   ```
+   GOOGLE_CLOUD_PROJECT_ID=your-project-id
+   GMAIL_PUBSUB_TOPIC=projects/your-project-id/topics/gmail-push
+   ```
+
+> **Local development:** Since Pub/Sub requires a public HTTPS endpoint, run `ngrok http 3005` and use the ngrok URL as the push endpoint. Without this, email processing still works — you just won't get real-time push notifications and will need to trigger email fetching manually.
+
+### Stripe (Payments)
+
+1. Create a [Stripe account](https://dashboard.stripe.com/register)
+2. Get your API keys:
+   - Go to **Developers → API keys**
+   - Copy the **Secret key** (starts with `sk_test_`)
+3. Create products and prices:
+   - Go to **Products → Add product**
+   - Create **Pro** plan: $15/month recurring → copy the Price ID (`price_xxx`)
+   - Create **Team** plan: $50/month recurring → copy the Price ID (`price_yyy`)
+4. Set up webhooks:
+   - Go to **Developers → Webhooks**
+   - Click **Add endpoint**
+   - Endpoint URL: `https://YOUR_DOMAIN/webhooks/stripe` (use ngrok for local dev)
+   - Events to listen for: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+   - Copy the **Signing secret** (starts with `whsec_`)
+5. Update `.env`:
+   ```
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   STRIPE_PRICE_PRO=price_xxx
+   STRIPE_PRICE_TEAM=price_yyy
+   ```
+
+> **Local development:** Run `stripe listen --forward-to localhost:3005/webhooks/stripe` using the [Stripe CLI](https://stripe.com/docs/stripe-cli) to forward webhook events locally. This also prints a webhook signing secret to use in your `.env`.
+
 ## Architecture
 
 ```
