@@ -165,19 +165,24 @@ bun test                      # Run tests
 - [x] Draft generator (GPT-4o, template support)
 - [x] Draft send via Gmail API
 
-### Phase 3: Frontend MVP — NOT STARTED
-- [ ] Next.js 14 setup with TailwindCSS
-- [ ] Landing page (hero, features, pricing, CTA)
-- [ ] Auth pages (signup, login)
-- [ ] Inbox UI (real-time via SSE, category filters, search)
-- [ ] Email viewer (full content, AI summary, draft panel)
-- [ ] Draft editor (edit AI draft, approve/send)
-- [ ] Rules builder (condition/action UI)
-- [ ] Account settings (connect Gmail, manage accounts)
+### Phase 3: Frontend MVP — COMPLETE
+- [x] Next.js 14 setup with TailwindCSS
+- [x] Landing page (hero, features, pricing, CTA)
+- [x] Auth pages (signup, login)
+- [x] Inbox UI (real-time via SSE, category filters, search)
+- [x] Email viewer (full content, AI summary, draft panel)
+- [x] Draft editor (edit AI draft, approve/send)
+- [x] Drafts page (list pending, approve/discard)
+- [x] Rules builder (condition/action UI, toggle, delete)
+- [x] Account settings (connect Gmail, manage accounts, billing)
+- [x] App layout with sidebar navigation
+- [x] Auth context + protected routes
+- [x] API client library
+- [x] SSE hook for real-time updates
 
-### Phase 4: Payments & Multi-Account — NOT STARTED
-- [ ] Stripe checkout integration (frontend)
-- [ ] Billing portal page
+### Phase 4: Payments & Multi-Account — PARTIAL (backend done, frontend wired)
+- [x] Stripe checkout integration (frontend buttons wired)
+- [x] Billing portal page (in settings)
 - [ ] Multi-account switcher UI
 - [ ] Usage limits enforcement middleware
 - [ ] Tier-gated features
