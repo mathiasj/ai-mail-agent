@@ -36,19 +36,26 @@ export default function InboxPage() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
+  const [accountId, setAccountId] = useState('all');
+  const [accounts, setAccounts] = useState<{ id: string; email: string }[]>([]);
   const [stats, setStats] = useState<{ unread: number; categories: any[] }>({
     unread: 0,
     categories: [],
   });
 
+  useEffect(() => {
+    api.getGmailAccounts().then(({ accounts: data }) => setAccounts(data));
+  }, []);
+
   const loadEmails = useCallback(async () => {
     const params: Record<string, string> = { archived: 'false' };
     if (category !== 'all') params.category = category;
+    if (accountId !== 'all') params.accountId = accountId;
     if (search) params.search = search;
     const { emails: data } = await api.getEmails(params);
     setEmails(data);
     setLoading(false);
-  }, [category, search]);
+  }, [category, accountId, search]);
 
   const loadStats = useCallback(async () => {
     const data = await api.getEmailStats();
@@ -105,13 +112,29 @@ export default function InboxPage() {
               </span>
             )}
           </div>
-          <input
-            type="text"
-            placeholder="Search emails..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Search emails..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+            {accounts.length > 1 && (
+              <select
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+                className="border rounded-lg px-2 py-2 text-sm bg-white"
+              >
+                <option value="all">All accounts</option>
+                {accounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.email}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
           <div className="flex gap-1 overflow-x-auto">
             {CATEGORIES.map((cat) => (
               <button

@@ -8,16 +8,19 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const [accounts, setAccounts] = useState<any[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
+  const [usageData, setUsageData] = useState<{ usage: any; limits: any } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [accountsData, subData] = await Promise.all([
+      const [accountsData, subData, usageResult] = await Promise.all([
         api.getGmailAccounts(),
         api.getSubscription(),
+        api.getUsage(),
       ]);
       setAccounts(accountsData.accounts);
       setSubscription(subData.subscription);
+      setUsageData(usageResult);
       setLoading(false);
     }
     load();
@@ -131,6 +134,30 @@ export default function SettingsPage() {
         )}
       </section>
 
+      {/* Usage */}
+      {usageData && (
+        <section className="border rounded-xl p-6">
+          <h2 className="text-lg font-semibold mb-4">Usage This Month</h2>
+          <div className="grid grid-cols-3 gap-4">
+            <UsageBar
+              label="Gmail Accounts"
+              used={usageData.usage.accountCount}
+              limit={usageData.limits.maxAccounts}
+            />
+            <UsageBar
+              label="Emails Processed"
+              used={usageData.usage.emailsThisMonth}
+              limit={usageData.limits.emailsPerMonth}
+            />
+            <UsageBar
+              label="AI Drafts"
+              used={usageData.usage.draftsThisMonth}
+              limit={usageData.limits.draftsPerMonth}
+            />
+          </div>
+        </section>
+      )}
+
       {/* Billing */}
       <section className="border rounded-xl p-6">
         <h2 className="text-lg font-semibold mb-4">Billing</h2>
@@ -182,6 +209,33 @@ export default function SettingsPage() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function UsageBar({ label, used, limit }: { label: string; used: number; limit: number }) {
+  const isUnlimited = limit > 99999;
+  const pct = isUnlimited ? 0 : Math.min((used / limit) * 100, 100);
+  const isNearLimit = pct > 80;
+
+  return (
+    <div>
+      <div className="flex justify-between text-sm mb-1">
+        <span className="text-gray-600">{label}</span>
+        <span className="font-medium">
+          {used} / {isUnlimited ? 'Unlimited' : limit.toLocaleString()}
+        </span>
+      </div>
+      {!isUnlimited && (
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${
+              isNearLimit ? 'bg-red-500' : 'bg-brand-500'
+            }`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

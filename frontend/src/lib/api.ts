@@ -183,6 +183,11 @@ class ApiClient {
     return this.request<{ subscription: any }>('/api/payments/subscription');
   }
 
+  // Usage
+  async getUsage() {
+    return this.request<{ usage: any; limits: any; tier: string }>('/api/usage');
+  }
+
   // SSE
   getEventStreamUrl(): string {
     const token = this.getToken();

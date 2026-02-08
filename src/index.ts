@@ -10,6 +10,7 @@ import emailRoutes from './api/routes/emails';
 import draftRoutes from './api/routes/drafts';
 import ruleRoutes from './api/routes/rules';
 import paymentRoutes from './api/routes/payments';
+import usageRoutes from './api/routes/usage';
 import sseRoutes from './api/routes/sse';
 
 // Webhooks
@@ -45,6 +46,7 @@ app.route('/api/emails', emailRoutes);
 app.route('/api/drafts', draftRoutes);
 app.route('/api/rules', ruleRoutes);
 app.route('/api/payments', paymentRoutes);
+app.route('/api/usage', usageRoutes);
 app.route('/api/events', sseRoutes);
 
 // ─── Webhooks (no auth) ─────────────────────────────────────────────

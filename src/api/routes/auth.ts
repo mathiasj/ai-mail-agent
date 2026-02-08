@@ -13,6 +13,7 @@ import {
   setupGmailWatch,
 } from '../../auth/gmail-oauth';
 import { emailQueue } from '../../workers/queue';
+import { checkCanAddAccount } from '../../core/usage-limits';
 
 const app = new Hono();
 
@@ -111,7 +112,13 @@ app.get('/me', authMiddleware, async (c) => {
 // ─── Gmail OAuth ─────────────────────────────────────────────────────
 
 app.get('/gmail/connect', authMiddleware, async (c) => {
-  const { sub } = c.get('user');
+  const { sub, tier } = c.get('user');
+
+  const canAdd = await checkCanAddAccount(sub, tier);
+  if (!canAdd) {
+    return c.json({ error: 'Account limit reached for your plan. Upgrade to connect more.' }, 429);
+  }
+
   const url = getGmailAuthUrl(sub);
   return c.json({ url });
 });

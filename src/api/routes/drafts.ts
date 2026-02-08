@@ -6,6 +6,7 @@ import { drafts, emails } from '../../db/schema';
 import { authMiddleware } from '../../auth/middleware';
 import { draftQueue } from '../../workers/queue';
 import { sendDraft } from '../../workers/draft-generator';
+import { checkCanGenerateDraft } from '../../core/usage-limits';
 
 const app = new Hono();
 
@@ -14,11 +15,17 @@ app.use('*', authMiddleware);
 // ─── Generate draft for an email ─────────────────────────────────────
 
 app.post('/generate', async (c) => {
-  const { sub } = c.get('user');
+  const { sub, tier } = c.get('user');
   const { emailId, template } = await c.req.json();
 
   if (!emailId) {
     return c.json({ error: 'emailId is required' }, 400);
+  }
+
+  // Check draft limits
+  const canGenerate = await checkCanGenerateDraft(sub, tier);
+  if (!canGenerate) {
+    return c.json({ error: 'Draft limit reached for your plan. Upgrade to generate more.' }, 429);
   }
 
   // Verify email belongs to user

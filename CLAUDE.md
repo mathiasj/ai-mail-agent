@@ -180,12 +180,13 @@ bun test                      # Run tests
 - [x] API client library
 - [x] SSE hook for real-time updates
 
-### Phase 4: Payments & Multi-Account — PARTIAL (backend done, frontend wired)
+### Phase 4: Payments & Multi-Account — COMPLETE
 - [x] Stripe checkout integration (frontend buttons wired)
 - [x] Billing portal page (in settings)
-- [ ] Multi-account switcher UI
-- [ ] Usage limits enforcement middleware
-- [ ] Tier-gated features
+- [x] Multi-account switcher UI (inbox dropdown filter)
+- [x] Usage limits enforcement middleware (src/core/usage-limits.ts)
+- [x] Tier-gated features (draft limit check, account limit check)
+- [x] Usage dashboard in settings (progress bars for accounts, emails, drafts)
 
 ### Phase 5: Advanced Features — NOT STARTED
 - [ ] Auto-reply safety (cooldown, max per sender, blocklist)
