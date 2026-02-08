@@ -29,7 +29,7 @@ app.use('*', prettyJSON());
 app.use(
   '*',
   cors({
-    origin: [env.APP_URL, 'http://localhost:3001'],
+    origin: [env.APP_URL, 'http://localhost:3001', 'http://localhost:3004'],
     credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
