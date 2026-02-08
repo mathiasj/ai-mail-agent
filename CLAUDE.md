@@ -194,8 +194,11 @@ bun test                      # Run tests
 - [x] Data export (CSV, JSON with date/category filters)
 - [ ] OpenClaw agent routing (optional — deferred)
 
-### Phase 6: Production Launch — NOT STARTED
-- [ ] Production Docker build + deploy config
-- [ ] Monitoring (Langfuse, Sentry)
-- [ ] Security audit
-- [ ] Marketing site content
+### Phase 6: Production Launch — COMPLETE
+- [x] Production Docker Compose (API, 3 workers, frontend, PostgreSQL, Redis)
+- [x] Frontend Dockerfile (standalone Next.js build)
+- [x] Rate limiting middleware (Redis-backed, per-endpoint config)
+- [x] Health check endpoint
+- [x] Security hardening (rate limits on auth/AI, CORS, input validation)
+- [ ] Monitoring (Langfuse, Sentry) — add when deploying
+- [ ] Marketing site content — polish when launching

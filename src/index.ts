@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { env } from './config/env';
+import { rateLimiter } from './api/middleware/rate-limit';
 
 // Routes
 import authRoutes from './api/routes/auth';
@@ -34,6 +35,18 @@ app.use(
     allowHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+// ─── Rate limiting ───────────────────────────────────────────────────
+
+// Strict rate limit on auth endpoints
+app.use('/api/auth/signup', rateLimiter({ windowMs: 60000, max: 5, keyPrefix: 'rl:signup' }));
+app.use('/api/auth/login', rateLimiter({ windowMs: 60000, max: 10, keyPrefix: 'rl:login' }));
+
+// Moderate rate limit on AI endpoints
+app.use('/api/drafts/generate', rateLimiter({ windowMs: 60000, max: 20, keyPrefix: 'rl:draft' }));
+
+// General API rate limit
+app.use('/api/*', rateLimiter({ windowMs: 60000, max: 100, keyPrefix: 'rl:api' }));
 
 // ─── Health check ────────────────────────────────────────────────────
 
