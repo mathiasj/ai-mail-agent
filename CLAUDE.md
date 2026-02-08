@@ -188,11 +188,11 @@ bun test                      # Run tests
 - [x] Tier-gated features (draft limit check, account limit check)
 - [x] Usage dashboard in settings (progress bars for accounts, emails, drafts)
 
-### Phase 5: Advanced Features — NOT STARTED
-- [ ] Auto-reply safety (cooldown, max per sender, blocklist)
-- [ ] Analytics dashboard (emails processed, categories, response times)
-- [ ] Data export (CSV, JSON)
-- [ ] OpenClaw agent routing (optional)
+### Phase 5: Advanced Features — COMPLETE
+- [x] Auto-reply safety (cooldown, max per sender per day, no-reply patterns, blocklist)
+- [x] Analytics dashboard (total emails, categories, daily volume, top senders, draft acceptance rate)
+- [x] Data export (CSV, JSON with date/category filters)
+- [ ] OpenClaw agent routing (optional — deferred)
 
 ### Phase 6: Production Launch — NOT STARTED
 - [ ] Production Docker build + deploy config

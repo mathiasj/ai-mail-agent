@@ -11,6 +11,8 @@ import draftRoutes from './api/routes/drafts';
 import ruleRoutes from './api/routes/rules';
 import paymentRoutes from './api/routes/payments';
 import usageRoutes from './api/routes/usage';
+import analyticsRoutes from './api/routes/analytics';
+import exportRoutes from './api/routes/export';
 import sseRoutes from './api/routes/sse';
 
 // Webhooks
@@ -47,6 +49,8 @@ app.route('/api/drafts', draftRoutes);
 app.route('/api/rules', ruleRoutes);
 app.route('/api/payments', paymentRoutes);
 app.route('/api/usage', usageRoutes);
+app.route('/api/analytics', analyticsRoutes);
+app.route('/api/export', exportRoutes);
 app.route('/api/events', sseRoutes);
 
 // ─── Webhooks (no auth) ─────────────────────────────────────────────

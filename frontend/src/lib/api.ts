@@ -183,6 +183,23 @@ class ApiClient {
     return this.request<{ subscription: any }>('/api/payments/subscription');
   }
 
+  // Analytics
+  async getAnalytics() {
+    return this.request<any>('/api/analytics/overview');
+  }
+
+  async exportEmails(format: 'json' | 'csv', params: Record<string, string> = {}) {
+    const query = new URLSearchParams({ format, ...params }).toString();
+    const token = this.getToken();
+    const response = await fetch(`${API_URL}/api/export?${query}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (format === 'csv') {
+      return response.text();
+    }
+    return response.json();
+  }
+
   // Usage
   async getUsage() {
     return this.request<{ usage: any; limits: any; tier: string }>('/api/usage');

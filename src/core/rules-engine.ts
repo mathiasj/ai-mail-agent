@@ -2,6 +2,7 @@ import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../db/client';
 import { emails, rules, type RuleConditions, type RuleActions } from '../db/schema';
 import { draftQueue } from '../workers/queue';
+import { canAutoReply } from './auto-reply-safety';
 
 export async function applyRules(emailId: string, userId: string): Promise<void> {
   const email = await db.query.emails.findFirst({
@@ -72,11 +73,17 @@ async function executeActions(
   }
 
   if (actions.auto_reply) {
-    await draftQueue.add('generate-reply', {
-      emailId: email.id,
-      userId: email.userId,
-      autoSend: false, // Always require human approval
-      template: actions.reply_template,
-    });
+    // Safety check before auto-replying
+    const safety = await canAutoReply(email.userId, email.from);
+    if (safety.allowed) {
+      await draftQueue.add('generate-reply', {
+        emailId: email.id,
+        userId: email.userId,
+        autoSend: false, // Always require human approval
+        template: actions.reply_template,
+      });
+    } else {
+      console.log(`Auto-reply blocked for email ${email.id}: ${safety.reason}`);
+    }
   }
 }
