@@ -35,7 +35,6 @@ app.use(
   cors({
     origin: [
       env.APP_URL,
-      'http://localhost:3001',
       'http://localhost:3004',
       'http://localhost:3006',
     ],
@@ -50,9 +49,12 @@ app.use(
 // Strict rate limit on auth endpoints
 app.use('/api/auth/signup', rateLimiter({ windowMs: 60000, max: 5, keyPrefix: 'rl:signup' }));
 app.use('/api/auth/login', rateLimiter({ windowMs: 60000, max: 10, keyPrefix: 'rl:login' }));
+app.use('/v1/auth/signup', rateLimiter({ windowMs: 60000, max: 5, keyPrefix: 'rl:signup' }));
+app.use('/v1/auth/login', rateLimiter({ windowMs: 60000, max: 10, keyPrefix: 'rl:login' }));
 
 // Moderate rate limit on AI endpoints
 app.use('/api/drafts/generate', rateLimiter({ windowMs: 60000, max: 20, keyPrefix: 'rl:draft' }));
+app.use('/v1/drafts/generate', rateLimiter({ windowMs: 60000, max: 20, keyPrefix: 'rl:draft' }));
 
 // General API rate limit
 app.use('/api/*', rateLimiter({ windowMs: 60000, max: 100, keyPrefix: 'rl:api' }));
