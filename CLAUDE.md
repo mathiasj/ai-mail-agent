@@ -1,13 +1,18 @@
-# AI Mail Agent - Claude Context
+# MailGate.ai + Velocity — Monorepo
 
 ## Project Overview
 
-SaaS platform where users connect Gmail accounts and let AI agents manage their email — classify, summarize, draft replies, and auto-respond based on smart rules.
+Dual-product Turborepo monorepo:
+- **MailGate.ai** — B2B email API infrastructure for AI agents (developer portal)
+- **Velocity** — B2C consumer email client (built on MailGate.ai API)
+
+Shared backend powers both products. Users connect Gmail accounts; AI classifies, summarizes, drafts replies, and auto-responds via smart rules.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
+| Monorepo | Turborepo + pnpm workspaces |
 | Runtime | Bun |
 | Backend | Hono (TypeScript) |
 | Database | PostgreSQL 16 + Drizzle ORM |
@@ -15,100 +20,200 @@ SaaS platform where users connect Gmail accounts and let AI agents manage their 
 | Cache | Redis |
 | AI/LLM | OpenAI GPT-4o (drafts), GPT-4o-mini (classification) |
 | Email | Gmail API + Pub/Sub webhooks |
-| Auth | JWT (jose) + Google OAuth 2.0 |
-| Payments | Stripe (subscriptions) |
+| Auth | JWT (jose) + Google OAuth 2.0 + API Keys (X-API-Key) |
+| Payments | Stripe (dual subscriptions: Velocity + Dashboard) |
 | Frontend | Next.js 14 + React + TailwindCSS |
+| SDK | @mailgate/sdk (shared TypeScript client) |
 | Real-time | Server-Sent Events (SSE) |
 | Deployment | Docker + docker-compose |
 
 ## Project Structure
 
 ```
-src/
-├── api/
-│   ├── routes/          # Hono route handlers
-│   │   ├── auth.ts      # Signup, login, Gmail OAuth, account management
-│   │   ├── emails.ts    # List, search, get, archive emails
-│   │   ├── drafts.ts    # Generate, edit, approve/send drafts
-│   │   ├── rules.ts     # CRUD for email automation rules
-│   │   ├── payments.ts  # Stripe checkout, portal, subscription status
-│   │   └── sse.ts       # Real-time Server-Sent Events
-│   └── webhooks/
-│       ├── gmail.ts     # Gmail Pub/Sub push notifications
-│       └── stripe.ts    # Stripe subscription lifecycle
-├── auth/
-│   ├── jwt.ts           # JWT sign/verify
-│   ├── middleware.ts     # Hono auth middleware
-│   └── gmail-oauth.ts   # Gmail OAuth 2.0 flow + watch setup
-├── config/
-│   └── env.ts           # Zod-validated env vars
-├── core/
-│   ├── email-parser.ts  # Gmail message parser (multipart, base64, HTML)
-│   └── rules-engine.ts  # Condition matching + action execution
-├── db/
-│   ├── schema.ts        # Drizzle schema (6 tables)
-│   └── client.ts        # PostgreSQL connection
-├── workers/
-│   ├── queue.ts         # BullMQ queue definitions
-│   ├── email-fetcher.ts # Fetches emails via Gmail API
-│   ├── classifier.ts    # GPT-4o-mini classification worker
-│   └── draft-generator.ts # GPT-4o draft + Gmail send
-└── index.ts             # Hono server entry point
-
-frontend/                # Next.js 14 app (Phase 3)
-drizzle/                 # Generated SQL migrations
+├── turbo.json                 # Turborepo pipeline config
+├── pnpm-workspace.yaml        # Workspace definition
+├── docker-compose.yml         # Dev: PostgreSQL + Redis
+├── docker-compose.prod.yml    # Prod: all services
+│
+├── apps/
+│   ├── api/                   # @mailgate/api — Hono backend (port 3005)
+│   │   ├── src/
+│   │   │   ├── api/
+│   │   │   │   ├── routes/
+│   │   │   │   │   ├── auth.ts          # Signup, login, Gmail OAuth
+│   │   │   │   │   ├── emails.ts        # List, search, get, archive
+│   │   │   │   │   ├── drafts.ts        # Generate, edit, approve/send
+│   │   │   │   │   ├── rules.ts         # Automation rules CRUD
+│   │   │   │   │   ├── api-keys.ts      # API key management
+│   │   │   │   │   ├── audit.ts         # Audit log viewer
+│   │   │   │   │   ├── filtering-rules.ts # Filtering rules CRUD
+│   │   │   │   │   ├── payments.ts      # Stripe checkout/portal
+│   │   │   │   │   └── sse.ts           # Real-time events
+│   │   │   │   ├── webhooks/
+│   │   │   │   │   ├── gmail.ts         # Gmail Pub/Sub push
+│   │   │   │   │   └── stripe.ts        # Stripe lifecycle (dual products)
+│   │   │   │   └── middleware/
+│   │   │   │       ├── permissions.ts   # Permission-based access control
+│   │   │   │       └── audit-log.ts     # Audit logging middleware
+│   │   │   ├── auth/
+│   │   │   │   ├── jwt.ts              # JWT sign/verify
+│   │   │   │   ├── middleware.ts       # Dual auth: API key + JWT
+│   │   │   │   └── gmail-oauth.ts     # Gmail OAuth 2.0
+│   │   │   ├── config/
+│   │   │   │   └── env.ts             # Zod-validated env vars
+│   │   │   ├── core/
+│   │   │   │   ├── email-parser.ts    # Gmail message parser
+│   │   │   │   ├── rules-engine.ts    # Automation rule execution
+│   │   │   │   ├── filtering-engine.ts # Rule-based email filtering
+│   │   │   │   └── usage-limits.ts    # Tier limits + usage checks
+│   │   │   ├── db/
+│   │   │   │   ├── schema.ts          # Drizzle schema (9 tables)
+│   │   │   │   └── client.ts          # PostgreSQL connection
+│   │   │   ├── workers/
+│   │   │   │   ├── queue.ts           # BullMQ queue definitions
+│   │   │   │   ├── email-fetcher.ts   # Gmail API fetch worker
+│   │   │   │   ├── classifier.ts      # Hybrid filtering + AI classification
+│   │   │   │   └── draft-generator.ts # GPT-4o draft + Gmail send
+│   │   │   └── index.ts              # Hono server entry (v1 + legacy routes)
+│   │   ├── drizzle/                   # Generated SQL migrations
+│   │   ├── Dockerfile
+│   │   └── package.json
+│   │
+│   ├── velocity/              # @mailgate/velocity — Consumer email client (port 3004)
+│   │   ├── src/
+│   │   │   ├── app/           # Next.js 14 app router pages
+│   │   │   └── lib/
+│   │   │       ├── api.ts     # SDK-backed API wrapper
+│   │   │       └── hooks/     # useAuth, useSSE
+│   │   ├── Dockerfile
+│   │   └── package.json
+│   │
+│   └── dashboard/             # @mailgate/dashboard — Developer portal (port 3006)
+│       ├── src/
+│       │   ├── app/           # Next.js 14 app router pages
+│       │   └── lib/
+│       │       ├── api.ts     # SDK-backed Dashboard API
+│       │       └── hooks/     # useAuth
+│       └── package.json
+│
+└── packages/
+    ├── config/                # @mailgate/config — Shared configs
+    │   ├── tsconfig/          # base.json, nextjs.json, bun.json
+    │   └── tailwind/          # base.ts (brand indigo palette)
+    ├── sdk/                   # @mailgate/sdk — TypeScript API client
+    │   └── src/
+    │       ├── client.ts      # MailGateClient (API key + Bearer auth)
+    │       ├── types.ts       # Shared types
+    │       └── resources/     # auth, emails, drafts, rules, api-keys, accounts
+    └── ui/                    # @mailgate/ui — Shared React components
+        └── src/               # Button, Input, Card, Badge, UsageBar
 ```
 
 ## Database Tables
 
-- `users` — Auth, tier, Stripe customer ID
+- `users` — Auth, velocityTier, dashboardTier, dual Stripe customer IDs
 - `gmail_accounts` — OAuth tokens, watch expiry, history ID
 - `emails` — Full email data + AI classification (category, priority, summary, entities)
 - `drafts` — AI-generated reply drafts, approval status
 - `rules` — User-defined automation rules (conditions → actions)
-- `subscriptions` — Stripe subscription tracking
+- `filtering_rules` — Enhanced filtering (domain, regex, keywords → classify/archive/mark_read)
+- `api_keys` — API key hashes, permissions, quotas, expiry
+- `audit_logs` — API request audit trail
+- `subscriptions` — Stripe subscription tracking (dual products)
 
 ## Key API Endpoints
 
+All routes available at both `/api/*` (legacy) and `/v1/*` (versioned).
+
 ```
-POST   /api/auth/signup              # Create account
-POST   /api/auth/login               # Login → JWT
-GET    /api/auth/me                  # Current user
-GET    /api/auth/gmail/connect       # Start Gmail OAuth
-GET    /api/auth/gmail/callback      # Gmail OAuth callback
-GET    /api/auth/gmail/accounts      # List connected accounts
-DELETE /api/auth/gmail/accounts/:id  # Disconnect account
+# Auth
+POST   /v1/auth/signup               # Create account
+POST   /v1/auth/login                # Login → JWT
+GET    /v1/auth/me                   # Current user
+GET    /v1/auth/gmail/connect        # Start Gmail OAuth
+GET    /v1/auth/gmail/callback       # Gmail OAuth callback
+GET    /v1/auth/gmail/accounts       # List connected accounts
+DELETE /v1/auth/gmail/accounts/:id   # Disconnect account
 
-GET    /api/emails                   # List (paginated, filterable, searchable)
-GET    /api/emails/:id               # Get single + mark read
-PATCH  /api/emails/:id/archive       # Archive
-GET    /api/emails/stats/overview    # Category stats + unread count
+# Emails
+GET    /v1/emails                    # List (paginated, filterable, searchable)
+GET    /v1/emails/:id                # Get single + mark read
+PATCH  /v1/emails/:id/archive        # Archive
+GET    /v1/emails/stats/overview     # Category stats + unread count
 
-POST   /api/drafts/generate          # Queue AI draft generation
-GET    /api/drafts                   # List pending drafts
-GET    /api/drafts/:id               # Get draft
-PATCH  /api/drafts/:id               # Edit draft content
-POST   /api/drafts/:id/send          # Approve + send
-DELETE /api/drafts/:id               # Delete draft
+# Drafts
+POST   /v1/drafts/generate           # Queue AI draft generation
+GET    /v1/drafts                    # List pending drafts
+GET    /v1/drafts/:id                # Get draft
+PATCH  /v1/drafts/:id                # Edit draft content
+POST   /v1/drafts/:id/send           # Approve + send
+DELETE /v1/drafts/:id                # Delete draft
 
-GET    /api/rules                    # List rules
-POST   /api/rules                    # Create rule
-GET    /api/rules/:id                # Get rule
-PUT    /api/rules/:id                # Update rule
-PATCH  /api/rules/:id/toggle         # Toggle enabled
-DELETE /api/rules/:id                # Delete rule
+# Rules
+GET    /v1/rules                     # List automation rules
+POST   /v1/rules                     # Create rule
+PUT    /v1/rules/:id                 # Update rule
+DELETE /v1/rules/:id                 # Delete rule
 
-POST   /api/payments/checkout        # Create Stripe checkout
-POST   /api/payments/portal          # Stripe billing portal
-GET    /api/payments/subscription    # Get subscription status
+# Filtering Rules
+GET    /v1/filtering-rules           # List filtering rules
+POST   /v1/filtering-rules           # Create filtering rule
+PUT    /v1/filtering-rules/:id       # Update filtering rule
+DELETE /v1/filtering-rules/:id       # Delete filtering rule
 
-GET    /api/events/stream?token=...  # SSE real-time events
+# API Keys
+GET    /v1/api-keys                  # List API keys
+POST   /v1/api-keys                  # Create API key (returns raw key once)
+GET    /v1/api-keys/:id              # Get API key details
+DELETE /v1/api-keys/:id              # Revoke API key
 
+# Audit
+GET    /v1/audit                     # List audit logs (paginated, filterable)
+
+# Payments
+POST   /v1/payments/checkout         # Create Stripe checkout
+POST   /v1/payments/portal           # Stripe billing portal
+GET    /v1/payments/subscription     # Get subscription status
+
+# Real-time
+GET    /v1/events/stream?token=...   # SSE real-time events
+
+# Webhooks
 POST   /webhooks/gmail               # Gmail Pub/Sub push
 POST   /webhooks/stripe              # Stripe events
 ```
 
+## Authentication
+
+Two auth methods (middleware tries API key first, falls back to JWT):
+
+1. **JWT Bearer** — Used by Velocity and Dashboard frontends
+   ```
+   Authorization: Bearer <jwt_token>
+   ```
+
+2. **API Key** — Used by external integrations and SDK
+   ```
+   X-API-Key: mg_live_<random>
+   ```
+   API keys have configurable permissions: `canRead`, `canWrite`, `canDelete`
+
+## Email Processing Pipeline
+
+```
+Gmail Webhook → emailQueue (fetch)
+  → classifyQueue:
+    1. Rule-based filtering (free, all tiers)
+    2. AI classification (GPT-4o-mini, paid tiers only)
+    3. Leave uncategorized (free tier, no rule match)
+  → rules engine (user automation rules)
+  → draftQueue (GPT-4o, if auto-reply enabled)
+  → SSE notify
+```
+
 ## Pricing Tiers
+
+### Velocity (Consumer)
 
 | Tier | Price | Accounts | Emails/mo | Drafts/mo |
 |------|-------|----------|-----------|-----------|
@@ -117,11 +222,14 @@ POST   /webhooks/stripe              # Stripe events
 | Team | $50/mo | 10 | 10,000 | Unlimited |
 | Enterprise | Custom | Unlimited | Unlimited | Unlimited |
 
-## Email Processing Pipeline
+### Dashboard (API/Developer)
 
-```
-Gmail Webhook → emailQueue (fetch) → classifyQueue (GPT-4o-mini) → rules engine → draftQueue (GPT-4o) → SSE notify
-```
+| Tier | AI Classification |
+|------|-------------------|
+| Free | No (rule-based only) |
+| Pro | Yes |
+| Team | Yes |
+| Enterprise | Yes |
 
 ## Conventions
 
@@ -129,76 +237,79 @@ Gmail Webhook → emailQueue (fetch) → classifyQueue (GPT-4o-mini) → rules e
 - Zod for all input validation
 - Drizzle ORM for all DB queries (no raw SQL)
 - BullMQ for all background jobs
-- JWT Bearer auth on all /api/* routes (except auth + webhooks)
+- Dual auth: API key (X-API-Key) + JWT Bearer on all /v1/* routes
 - Hono route groups per domain
 - Workers run as separate processes
+- pnpm for package management
+- Turborepo for monorepo orchestration
 
 ## Development Commands
 
 ```bash
-docker-compose up -d          # Start PostgreSQL + Redis
-bun run db:push               # Push schema to DB
-bun run dev                   # Start API server (port 3000)
-bun run worker:all            # Start all workers
-cd frontend && bun run dev    # Start frontend (port 3001)
-bun run typecheck             # Type check
-bun test                      # Run tests
+# Root (monorepo)
+pnpm install                          # Install all dependencies
+pnpm dev                              # Start all apps
+pnpm dev --filter=@mailgate/api       # Start API only (port 3005)
+pnpm dev --filter=@mailgate/velocity  # Start Velocity only (port 3004)
+pnpm dev --filter=@mailgate/dashboard # Start Dashboard only (port 3006)
+pnpm build                            # Build all apps
+pnpm typecheck                        # Type check all packages
+
+# Database
+pnpm --filter=@mailgate/api db:push   # Push schema to DB
+pnpm --filter=@mailgate/api db:generate # Generate migrations
+
+# Infrastructure
+docker-compose up -d                  # Start PostgreSQL + Redis (dev)
+docker-compose -f docker-compose.prod.yml up -d  # Start all (prod)
 ```
 
 ---
 
 ## Implementation Progress
 
-### Phase 1: Core Infrastructure — COMPLETE
-- [x] Bun + Hono + TypeScript project setup
-- [x] PostgreSQL + Drizzle schema (6 tables, migrations generated)
-- [x] Redis + BullMQ queue setup
-- [x] JWT auth (signup, login, middleware)
-- [x] Gmail OAuth 2.0 (connect, callback, token refresh, watch)
-- [x] Gmail Pub/Sub webhook handler
-- [x] Email fetcher worker (initial sync + incremental)
+### Monorepo Migration — COMPLETE
+- [x] Turborepo + pnpm workspace scaffolding
+- [x] Backend moved to apps/api/
+- [x] Frontend moved to apps/velocity/ (rebranded to Velocity)
+- [x] Shared packages: config, ui, sdk
+- [x] @mailgate/sdk with typed resource classes
+- [x] Velocity api.ts replaced with SDK-backed wrapper
 
-### Phase 2: Email Processing — COMPLETE
-- [x] Email parser (multipart, base64, HTML stripping)
-- [x] Email classifier (GPT-4o-mini: category, priority, summary, entities)
-- [x] Rules engine (condition matching, action execution)
-- [x] Draft generator (GPT-4o, template support)
-- [x] Draft send via Gmail API
+### Database Additions — COMPLETE
+- [x] users table: velocityTier, dashboardTier, dual Stripe IDs
+- [x] api_keys table (hash, prefix, permissions, quota)
+- [x] audit_logs table
+- [x] filtering_rules table (domain, regex, keyword conditions)
+- [x] subscriptions: product field for dual billing
 
-### Phase 3: Frontend MVP — COMPLETE
-- [x] Next.js 14 setup with TailwindCSS
-- [x] Landing page (hero, features, pricing, CTA)
-- [x] Auth pages (signup, login)
-- [x] Inbox UI (real-time via SSE, category filters, search)
-- [x] Email viewer (full content, AI summary, draft panel)
-- [x] Draft editor (edit AI draft, approve/send)
-- [x] Drafts page (list pending, approve/discard)
-- [x] Rules builder (condition/action UI, toggle, delete)
-- [x] Account settings (connect Gmail, manage accounts, billing)
-- [x] App layout with sidebar navigation
-- [x] Auth context + protected routes
-- [x] API client library
-- [x] SSE hook for real-time updates
+### API Key Auth + Permissions — COMPLETE
+- [x] Dual auth middleware (API key first, JWT fallback)
+- [x] Permission-based access control (canRead/canWrite/canDelete)
+- [x] API key CRUD routes
+- [x] Audit logging middleware
+- [x] Audit log viewer route
+- [x] API versioning (/v1/ prefix, /api/ legacy)
 
-### Phase 4: Payments & Multi-Account — COMPLETE
-- [x] Stripe checkout integration (frontend buttons wired)
-- [x] Billing portal page (in settings)
-- [x] Multi-account switcher UI (inbox dropdown filter)
-- [x] Usage limits enforcement middleware (src/core/usage-limits.ts)
-- [x] Tier-gated features (draft limit check, account limit check)
-- [x] Usage dashboard in settings (progress bars for accounts, emails, drafts)
+### Dashboard App — COMPLETE
+- [x] Next.js 14 developer portal (apps/dashboard)
+- [x] API key management UI
+- [x] Filtering rules builder
+- [x] Usage dashboard
+- [x] Audit log viewer
+- [x] Billing integration
 
-### Phase 5: Advanced Features — COMPLETE
-- [x] Auto-reply safety (cooldown, max per sender per day, no-reply patterns, blocklist)
-- [x] Analytics dashboard (total emails, categories, daily volume, top senders, draft acceptance rate)
-- [x] Data export (CSV, JSON with date/category filters)
-- [ ] OpenClaw agent routing (optional — deferred)
+### Hybrid Filtering Engine — COMPLETE
+- [x] Rule-based filtering (free for all tiers)
+- [x] AI classification gated by tier
+- [x] Classifier worker: rules first → AI fallback → uncategorized
 
-### Phase 6: Production Launch — COMPLETE
-- [x] Production Docker Compose (API, 3 workers, frontend, PostgreSQL, Redis)
-- [x] Frontend Dockerfile (standalone Next.js build)
-- [x] Rate limiting middleware (Redis-backed, per-endpoint config)
-- [x] Health check endpoint
-- [x] Security hardening (rate limits on auth/AI, CORS, input validation)
+### Velocity Rebrand — COMPLETE
+- [x] All "AI Mail Agent" → "Velocity" branding
+- [x] Layout, navbar, landing page, login, signup updated
+
+### Deferred
 - [ ] Monitoring (Langfuse, Sentry) — add when deploying
-- [ ] Marketing site content — polish when launching
+- [ ] Dual billing checkout (separate Stripe products per app)
+- [ ] PII filtering for API responses
+- [ ] OpenClaw agent routing

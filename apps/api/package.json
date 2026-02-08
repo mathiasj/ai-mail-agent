@@ -1,0 +1,40 @@
+{
+  "name": "@mailgate/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "start": "bun run dist/index.js",
+    "worker:email": "bun run --watch src/workers/email-fetcher.ts",
+    "worker:classify": "bun run --watch src/workers/classifier.ts",
+    "worker:draft": "bun run --watch src/workers/draft-generator.ts",
+    "worker:all": "bun run worker:email & bun run worker:classify & bun run worker:draft",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "bcrypt": "^5.1.1",
+    "bullmq": "^5.34.3",
+    "drizzle-orm": "^0.38.3",
+    "googleapis": "^144.0.0",
+    "hono": "^4.6.16",
+    "ioredis": "^5.4.2",
+    "jose": "^5.9.6",
+    "openai": "^4.77.0",
+    "postgres": "^3.4.5",
+    "stripe": "^17.5.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/bun": "^1.1.14",
+    "drizzle-kit": "^0.30.2",
+    "typescript": "^5.7.2"
+  }
+}

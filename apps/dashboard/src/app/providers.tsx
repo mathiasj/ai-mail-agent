@@ -1,0 +1,8 @@
+'use client';
+
+import { AuthContext, useAuthProvider } from '@/lib/hooks/useAuth';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const auth = useAuthProvider();
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+}
