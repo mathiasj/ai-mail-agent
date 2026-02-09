@@ -69,9 +69,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   // Determine which product this subscription is for
-  const product = subscription.metadata.product || 'velocity';
-  const tierField = product === 'dashboard' ? 'dashboardTier' : 'velocityTier';
-  const customerField = product === 'dashboard' ? 'stripeDashboardCustomerId' : 'stripeVelocityCustomerId';
+  const product = subscription.metadata.product || 'inboxrules';
+  const tierField = product === 'dashboard' ? 'dashboardTier' : 'inboxrulesTier';
+  const customerField = product === 'dashboard' ? 'stripeDashboardCustomerId' : 'stripeInboxrulesCustomerId';
 
   await db
     .update(users)
@@ -101,7 +101,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     .where(eq(subscriptions.stripeSubscriptionId, subscription.id));
 
   const product = subscription.metadata.product || existing.product;
-  const tierField = product === 'dashboard' ? 'dashboardTier' : 'velocityTier';
+  const tierField = product === 'dashboard' ? 'dashboardTier' : 'inboxrulesTier';
 
   await db
     .update(users)
@@ -122,7 +122,7 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
     .where(eq(subscriptions.stripeSubscriptionId, subscription.id));
 
   // Downgrade to free
-  const tierField = existing.product === 'dashboard' ? 'dashboardTier' : 'velocityTier';
+  const tierField = existing.product === 'dashboard' ? 'dashboardTier' : 'inboxrulesTier';
   await db
     .update(users)
     .set({ [tierField]: 'free', updatedAt: new Date() } as any)

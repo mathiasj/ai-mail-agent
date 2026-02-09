@@ -69,9 +69,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  velocity:
+  inboxrules:
     build:
-      context: ./apps/velocity
+      context: ./apps/inboxrules
       dockerfile: Dockerfile
     ports:
       - "3004:3004"

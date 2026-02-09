@@ -103,7 +103,7 @@ export interface ApiKey {
   userId: string;
   name: string;
   keyPrefix: string;
-  type: 'user' | 'velocity';
+  type: 'user' | 'inboxrules';
   permissions: ApiKeyPermissions;
   monthlyQuota?: number | null;
   lastUsedAt?: string | null;

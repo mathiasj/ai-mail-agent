@@ -51,7 +51,7 @@ app.post('/signup', async (c) => {
   const [user] = await db
     .insert(users)
     .values({ email, passwordHash, name })
-    .returning({ id: users.id, email: users.email, tier: users.velocityTier });
+    .returning({ id: users.id, email: users.email, tier: users.inboxrulesTier });
 
   const token = await signToken({
     sub: user.id,
@@ -87,12 +87,12 @@ app.post('/login', async (c) => {
   const token = await signToken({
     sub: user.id,
     email: user.email,
-    tier: user.velocityTier,
+    tier: user.inboxrulesTier,
   });
 
   return c.json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, tier: user.velocityTier },
+    user: { id: user.id, email: user.email, name: user.name, tier: user.inboxrulesTier },
   });
 });
 
@@ -102,11 +102,11 @@ app.get('/me', authMiddleware, async (c) => {
   const { sub } = c.get('user');
   const user = await db.query.users.findFirst({
     where: eq(users.id, sub),
-    columns: { id: true, email: true, name: true, velocityTier: true, createdAt: true },
+    columns: { id: true, email: true, name: true, inboxrulesTier: true, createdAt: true },
   });
 
   if (!user) return c.json({ error: 'User not found' }, 404);
-  return c.json({ user: { ...user, tier: user.velocityTier } });
+  return c.json({ user: { ...user, tier: user.inboxrulesTier } });
 });
 
 // ─── Gmail OAuth ─────────────────────────────────────────────────────

@@ -40,7 +40,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="w-64 border-r bg-gray-50 flex flex-col">
         <div className="p-4 border-b">
           <Link href="/inbox" className="text-lg font-bold text-brand-600">
-            Velocity
+            Inboxrules
           </Link>
         </div>
 

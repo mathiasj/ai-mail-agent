@@ -8,9 +8,9 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   name: text('name'),
-  velocityTier: text('velocity_tier').notNull().default('free'), // free, pro, team, enterprise
+  inboxrulesTier: text('inboxrules_tier').notNull().default('free'), // free, pro, team, enterprise
   dashboardTier: text('dashboard_tier').notNull().default('free'), // free, pro, team, enterprise
-  stripeVelocityCustomerId: text('stripe_velocity_customer_id'),
+  stripeInboxrulesCustomerId: text('stripe_inboxrules_customer_id'),
   stripeDashboardCustomerId: text('stripe_dashboard_customer_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -155,7 +155,7 @@ export const subscriptions = pgTable('subscriptions', {
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   stripeSubscriptionId: text('stripe_subscription_id').notNull().unique(),
   tier: text('tier').notNull(), // pro, team, enterprise
-  product: text('product').notNull().default('velocity'), // velocity, dashboard
+  product: text('product').notNull().default('inboxrules'), // inboxrules, dashboard
   status: text('status').notNull(), // active, canceled, past_due, trialing
   currentPeriodEnd: timestamp('current_period_end').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -182,7 +182,7 @@ export const apiKeys = pgTable('api_keys', {
   name: text('name').notNull(),
   keyHash: text('key_hash').notNull(),
   keyPrefix: text('key_prefix').notNull(), // e.g. "mg_live_abc1"
-  type: text('type').notNull().default('user'), // 'user' | 'velocity'
+  type: text('type').notNull().default('user'), // 'user' | 'inboxrules'
   permissions: jsonb('permissions').$type<ApiKeyPermissions>().notNull().default({
     canRead: true,
     canWrite: false,

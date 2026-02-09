@@ -7,7 +7,7 @@
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "dev:api": "turbo dev --filter=@mailgate/api",
-    "dev:velocity": "turbo dev --filter=@mailgate/velocity",
+    "dev:inboxrules": "turbo dev --filter=@mailgate/inboxrules",
     "dev:dashboard": "turbo dev --filter=@mailgate/dashboard",
     "db:generate": "pnpm --filter=@mailgate/api db:generate",
     "db:push": "pnpm --filter=@mailgate/api db:push",

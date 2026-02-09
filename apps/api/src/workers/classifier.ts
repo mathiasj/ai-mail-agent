@@ -73,7 +73,7 @@ const worker = new Worker(
 
     if (!user) return;
 
-    const canUseAI = await checkCanUseAIClassification(user.dashboardTier || user.velocityTier);
+    const canUseAI = await checkCanUseAIClassification(user.dashboardTier || user.inboxrulesTier);
     if (!canUseAI) {
       console.log(`Email ${emailId}: user on free tier, no AI classification (left as uncategorized)`);
       return;

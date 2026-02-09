@@ -85,7 +85,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <span className="text-xl font-bold text-brand-600">Velocity</span>
+          <span className="text-xl font-bold text-brand-600">Inboxrules</span>
           <div className="flex items-center gap-6">
             <a href="#features" className="text-sm text-gray-600 hover:text-gray-900">
               Features
@@ -206,7 +206,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Velocity. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Inboxrules. All rights reserved.</p>
         </div>
       </footer>
     </div>

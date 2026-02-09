@@ -71,7 +71,7 @@ async function handleApiKeyAuth(c: Context, next: Next, rawKey: string) {
   c.set('user', {
     sub: user.id,
     email: user.email,
-    tier: user.velocityTier,
+    tier: user.inboxrulesTier,
   });
   c.set('apiKey', key);
   c.set('authMethod', 'api-key');

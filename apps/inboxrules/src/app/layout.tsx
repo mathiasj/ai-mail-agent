@@ -6,7 +6,7 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Velocity - Your AI Email Assistant',
+  title: 'Inboxrules - Your AI Email Assistant',
   description:
     'Connect your Gmail, let AI classify, summarize, and draft replies. You stay in control.',
 };

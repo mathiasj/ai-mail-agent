@@ -6,7 +6,7 @@ export function requirePermission(...permissions: Permission[]) {
   return async (c: Context, next: Next) => {
     const authMethod = c.get('authMethod');
 
-    // JWT users (Velocity) get full access to their own data
+    // JWT users (Inboxrules) get full access to their own data
     if (authMethod === 'jwt') {
       return next();
     }

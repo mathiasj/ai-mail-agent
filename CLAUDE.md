@@ -1,10 +1,10 @@
-# MailGate.ai + Velocity — Monorepo
+# MailGate.ai + Inboxrules — Monorepo
 
 ## Project Overview
 
 Dual-product Turborepo monorepo:
 - **MailGate.ai** — B2B email API infrastructure for AI agents (developer portal)
-- **Velocity** — B2C consumer email client (built on MailGate.ai API)
+- **Inboxrules** — B2C consumer email client (built on MailGate.ai API)
 
 Shared backend powers both products. Users connect Gmail accounts; AI classifies, summarizes, drafts replies, and auto-responds via smart rules.
 
@@ -21,7 +21,7 @@ Shared backend powers both products. Users connect Gmail accounts; AI classifies
 | AI/LLM | OpenAI GPT-4o (drafts), GPT-4o-mini (classification) |
 | Email | Gmail API + Pub/Sub webhooks |
 | Auth | JWT (jose) + Google OAuth 2.0 + API Keys (X-API-Key) |
-| Payments | Stripe (dual subscriptions: Velocity + Dashboard) |
+| Payments | Stripe (dual subscriptions: Inboxrules + Dashboard) |
 | Frontend | Next.js 14 + React + TailwindCSS |
 | SDK | @mailgate/sdk (shared TypeScript client) |
 | Real-time | Server-Sent Events (SSE) |
@@ -79,7 +79,7 @@ Shared backend powers both products. Users connect Gmail accounts; AI classifies
 │   │   ├── Dockerfile
 │   │   └── package.json
 │   │
-│   ├── velocity/              # @mailgate/velocity — Consumer email client (port 3004)
+│   ├── inboxrules/            # @mailgate/inboxrules — Inboxrules consumer email client (port 3004)
 │   │   ├── src/
 │   │   │   ├── app/           # Next.js 14 app router pages
 │   │   │   └── lib/
@@ -111,7 +111,7 @@ Shared backend powers both products. Users connect Gmail accounts; AI classifies
 
 ## Database Tables
 
-- `users` — Auth, velocityTier, dashboardTier, dual Stripe customer IDs
+- `users` — Auth, inboxrulesTier, dashboardTier, dual Stripe customer IDs
 - `gmail_accounts` — OAuth tokens, watch expiry, history ID
 - `emails` — Full email data + AI classification (category, priority, summary, entities)
 - `drafts` — AI-generated reply drafts, approval status
@@ -187,7 +187,7 @@ POST   /webhooks/stripe              # Stripe events
 
 Two auth methods (middleware tries API key first, falls back to JWT):
 
-1. **JWT Bearer** — Used by Velocity and Dashboard frontends
+1. **JWT Bearer** — Used by Inboxrules and Dashboard frontends
    ```
    Authorization: Bearer <jwt_token>
    ```
@@ -213,7 +213,7 @@ Gmail Webhook → emailQueue (fetch)
 
 ## Pricing Tiers
 
-### Velocity (Consumer)
+### Inboxrules (Consumer)
 
 | Tier | Price | Accounts | Emails/mo | Drafts/mo |
 |------|-------|----------|-----------|-----------|
@@ -250,7 +250,7 @@ Gmail Webhook → emailQueue (fetch)
 pnpm install                          # Install all dependencies
 pnpm dev                              # Start all apps
 pnpm dev --filter=@mailgate/api       # Start API only (port 3005)
-pnpm dev --filter=@mailgate/velocity  # Start Velocity only (port 3004)
+pnpm dev --filter=@mailgate/inboxrules # Start Inboxrules only (port 3004)
 pnpm dev --filter=@mailgate/dashboard # Start Dashboard only (port 3006)
 pnpm build                            # Build all apps
 pnpm typecheck                        # Type check all packages
@@ -271,13 +271,13 @@ docker-compose -f docker-compose.prod.yml up -d  # Start all (prod)
 ### Monorepo Migration — COMPLETE
 - [x] Turborepo + pnpm workspace scaffolding
 - [x] Backend moved to apps/api/
-- [x] Frontend moved to apps/velocity/ (rebranded to Velocity)
+- [x] Frontend moved to apps/inboxrules/ (rebranded to Inboxrules)
 - [x] Shared packages: config, ui, sdk
 - [x] @mailgate/sdk with typed resource classes
-- [x] Velocity api.ts replaced with SDK-backed wrapper
+- [x] Inboxrules api.ts replaced with SDK-backed wrapper
 
 ### Database Additions — COMPLETE
-- [x] users table: velocityTier, dashboardTier, dual Stripe IDs
+- [x] users table: inboxrulesTier, dashboardTier, dual Stripe IDs
 - [x] api_keys table (hash, prefix, permissions, quota)
 - [x] audit_logs table
 - [x] filtering_rules table (domain, regex, keyword conditions)
@@ -304,8 +304,8 @@ docker-compose -f docker-compose.prod.yml up -d  # Start all (prod)
 - [x] AI classification gated by tier
 - [x] Classifier worker: rules first → AI fallback → uncategorized
 
-### Velocity Rebrand — COMPLETE
-- [x] All "AI Mail Agent" → "Velocity" branding
+### Inboxrules Rebrand — COMPLETE
+- [x] All "AI Mail Agent" → "Inboxrules" branding
 - [x] Layout, navbar, landing page, login, signup updated
 
 ### Deferred
