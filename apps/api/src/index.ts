@@ -126,9 +126,9 @@ app.onError((err, c) => {
 
 // ─── Start server ────────────────────────────────────────────────────
 
-console.log(`Starting server on port ${env.PORT}...`);
+console.log(`Starting server on port ${env.BACKEND_API_PORT}...`);
 
 export default {
-  port: env.PORT,
+  port: env.BACKEND_API_PORT,
   fetch: app.fetch,
 };

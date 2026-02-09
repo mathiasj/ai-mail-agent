@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     ports:
-      - "${POSTGRES_PORT:-5433}:5432"
+      - "${POSTGRES_DB_PORT:-5433}:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -18,7 +18,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_CACHE_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -30,7 +30,7 @@ services:
   api:
     image: oven/bun:1
     ports:
-      - "${API_PORT:-3005}:3005"
+      - "${BACKEND_API_PORT:-3005}:3005"
     volumes:
       - .:/app
       - bun_node_modules:/app/node_modules
@@ -116,7 +116,7 @@ services:
   inboxrules:
     image: node:20-alpine
     ports:
-      - "${INBOXRULES_PORT:-3004}:3004"
+      - "${INBOXRULES_FRONTEND_PORT:-3004}:3004"
     volumes:
       - .:/app
       - node_node_modules:/app/node_modules
@@ -128,14 +128,14 @@ services:
     command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile && cd apps/inboxrules && pnpm dev"
     env_file: .env
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-3005}
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_API_PORT:-3005}
     depends_on:
       - api
 
   dashboard:
     image: node:20-alpine
     ports:
-      - "${DASHBOARD_PORT:-3006}:3006"
+      - "${DASHBOARD_FRONTEND_PORT:-3006}:3006"
     volumes:
       - .:/app
       - node_node_modules:/app/node_modules
@@ -147,7 +147,7 @@ services:
     command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile && cd apps/dashboard && pnpm dev"
     env_file: .env
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-3005}
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_API_PORT:-3005}
     depends_on:
       - api
 

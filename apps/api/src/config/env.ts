@@ -37,12 +37,12 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().default(''),
   STRIPE_PRICE_PRO: z.string().default(''),
   STRIPE_PRICE_TEAM: z.string().default(''),
-  APP_URL: z.string().default('http://localhost:3005'),
-  PORT: z.coerce.number().default(3005),
+  APP_URL: z.string().optional(),
+  BACKEND_API_PORT: z.coerce.number().default(3005),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 
-export type Env = z.infer<typeof envSchema>;
+export type Env = z.infer<typeof envSchema> & { APP_URL: string };
 
 function loadEnv(): Env {
   const result = envSchema.safeParse(process.env);
@@ -50,7 +50,11 @@ function loadEnv(): Env {
     console.error('Invalid environment variables:', result.error.flatten().fieldErrors);
     throw new Error('Invalid environment variables');
   }
-  return result.data;
+  const data = result.data;
+  return {
+    ...data,
+    APP_URL: data.APP_URL || `http://localhost:${data.BACKEND_API_PORT}`,
+  };
 }
 
 export const env = loadEnv();
