@@ -243,6 +243,36 @@ Gmail Webhook → emailQueue (fetch)
 - pnpm for package management
 - Turborepo for monorepo orchestration
 
+## Testing
+
+**Always run tests after making code changes:** `cd apps/api && bun test`
+
+**When adding new functionality, use TDD:**
+1. Write failing tests first that describe the expected behavior
+2. Implement the code to make the tests pass
+3. Refactor if needed while keeping tests green
+
+**When modifying existing code:**
+1. Run the full test suite before starting to confirm a green baseline
+2. Make the changes
+3. Run tests again to catch any regressions
+4. Add or update tests if behavior changed
+
+**Test organization:**
+- Place test files next to the source: `foo.ts` → `foo.test.ts`
+- Use `src/__test-utils__/fixtures.ts` for factory functions (`makeUser`, `makeEmail`, etc.)
+- Use `src/__test-utils__/db-mock.ts` for mocking the Drizzle DB
+- Mock external dependencies (DB, OpenAI, Redis) — never hit real services in tests
+- Pure function tests need no mocks; prefer testing pure logic where possible
+
+**Test commands:**
+```bash
+cd apps/api && bun test              # Run all API tests
+cd apps/api && bun test --watch      # Watch mode
+cd apps/api && bun test src/core/    # Run specific directory
+pnpm test                            # Monorepo-wide via Turborepo
+```
+
 ## Development Commands
 
 ```bash
@@ -254,6 +284,11 @@ pnpm dev --filter=@mailgate/inboxrules # Start Inboxrules only (port 3004)
 pnpm dev --filter=@mailgate/dashboard # Start Dashboard only (port 3006)
 pnpm build                            # Build all apps
 pnpm typecheck                        # Type check all packages
+pnpm test                             # Run all tests
+
+# Testing
+cd apps/api && bun test               # Run API tests
+cd apps/api && bun test --watch       # Watch mode
 
 # Database
 pnpm --filter=@mailgate/api db:push   # Push schema to DB

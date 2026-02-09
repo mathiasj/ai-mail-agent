@@ -232,10 +232,36 @@ All authenticated endpoints require `Authorization: Bearer <token>` header.
 ### Real-time
 - `GET /api/events/stream?token=...` — SSE stream for live updates
 
+## Testing
+
+The API backend has a comprehensive test suite using `bun test` (built-in, zero external deps).
+
+```bash
+# Run all tests (monorepo-wide via Turborepo)
+pnpm test
+
+# Run API tests directly
+cd apps/api && bun test
+
+# Watch mode during development
+cd apps/api && bun test --watch
+
+# Run a specific test file
+cd apps/api && bun test src/core/email-parser.test.ts
+```
+
+Tests are organized by layer:
+- `src/core/*.test.ts` — Pure business logic (email parsing, filtering, rules, usage limits, auto-reply safety)
+- `src/auth/*.test.ts` — JWT signing/verification, auth middleware
+- `src/api/middleware/*.test.ts` — Permission checks
+- `src/api/routes/*.test.ts` — Route integration tests (mocked DB)
+- `src/workers/*.test.ts` — Worker logic (mocked DB + OpenAI)
+
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
+| `pnpm test` | Run all tests (monorepo-wide) |
 | `bun run dev` | Start API server (port 3000) |
 | `bun run worker:all` | Start all background workers |
 | `bun run worker:email` | Start email fetcher worker only |
@@ -245,7 +271,7 @@ All authenticated endpoints require `Authorization: Bearer <token>` header.
 | `bun run db:push` | Push schema directly to DB |
 | `bun run db:studio` | Open Drizzle Studio (DB browser) |
 | `bun run typecheck` | TypeScript type check |
-| `bun test` | Run tests |
+| `bun test` | Run API tests directly |
 
 ## Pricing
 
