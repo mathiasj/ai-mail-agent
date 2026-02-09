@@ -258,6 +258,14 @@ Gmail Webhook → emailQueue (fetch)
 3. Run tests again to catch any regressions
 4. Add or update tests if behavior changed
 
+**Test integrity — these rules are non-negotiable:**
+- NEVER skip, disable, or `.todo()` tests to make the suite pass
+- NEVER write mocks that return empty/dummy data just to satisfy a test — mock data must be realistic and representative of real-world values (use the fixture factories in `__test-utils__/fixtures.ts`)
+- NEVER weaken assertions (e.g. changing `toBe(expected)` to `toBeDefined()`) to make a failing test pass — fix the code instead
+- NEVER delete a failing test instead of fixing the underlying issue
+- If a test fails, the code is wrong until proven otherwise — investigate and fix the root cause
+- Tests must verify actual behavior, not just that code runs without throwing
+
 **Test organization:**
 - Place test files next to the source: `foo.ts` → `foo.test.ts`
 - Use `src/__test-utils__/fixtures.ts` for factory functions (`makeUser`, `makeEmail`, etc.)
