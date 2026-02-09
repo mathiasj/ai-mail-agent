@@ -30,22 +30,30 @@ services:
   api:
     image: oven/bun:1
     ports:
-      - "${BACKEND_API_PORT:-3005}:3005"
+      - "${BACKEND_API_PORT:-3005}:${BACKEND_API_PORT:-3005}"
     volumes:
       - .:/app
       - bun_node_modules:/app/node_modules
       - bun_api_node_modules:/app/apps/api/node_modules
+      - bun_inboxrules_node_modules:/app/apps/inboxrules/node_modules
+      - bun_dashboard_node_modules:/app/apps/dashboard/node_modules
       - bun_sdk_node_modules:/app/packages/sdk/node_modules
       - bun_ui_node_modules:/app/packages/ui/node_modules
       - bun_config_node_modules:/app/packages/config/node_modules
     working_dir: /app
-    command: sh -c "bun install && cd apps/api && bun run --watch src/index.ts"
+    command: sh -c "bun install || true; cd apps/api && bun run --watch src/index.ts"
     env_file: .env
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_DB_PORT: 5432
       REDIS_HOST: redis
       REDIS_CACHE_PORT: 6379
+    healthcheck:
+      test: ["CMD-SHELL", "bun -e \"fetch('http://localhost:${BACKEND_API_PORT:-3005}/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,11 +66,13 @@ services:
       - .:/app
       - bun_node_modules:/app/node_modules
       - bun_api_node_modules:/app/apps/api/node_modules
+      - bun_inboxrules_node_modules:/app/apps/inboxrules/node_modules
+      - bun_dashboard_node_modules:/app/apps/dashboard/node_modules
       - bun_sdk_node_modules:/app/packages/sdk/node_modules
       - bun_ui_node_modules:/app/packages/ui/node_modules
       - bun_config_node_modules:/app/packages/config/node_modules
-    working_dir: /app
-    command: sh -c "bun install && cd apps/api && bun run --watch src/workers/email-fetcher.ts"
+    working_dir: /app/apps/api
+    command: bun run --watch src/workers/email-fetcher.ts
     env_file: .env
     environment:
       POSTGRES_HOST: postgres
@@ -70,9 +80,7 @@ services:
       REDIS_HOST: redis
       REDIS_CACHE_PORT: 6379
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
+      api:
         condition: service_healthy
 
   worker-classify:
@@ -81,11 +89,13 @@ services:
       - .:/app
       - bun_node_modules:/app/node_modules
       - bun_api_node_modules:/app/apps/api/node_modules
+      - bun_inboxrules_node_modules:/app/apps/inboxrules/node_modules
+      - bun_dashboard_node_modules:/app/apps/dashboard/node_modules
       - bun_sdk_node_modules:/app/packages/sdk/node_modules
       - bun_ui_node_modules:/app/packages/ui/node_modules
       - bun_config_node_modules:/app/packages/config/node_modules
-    working_dir: /app
-    command: sh -c "bun install && cd apps/api && bun run --watch src/workers/classifier.ts"
+    working_dir: /app/apps/api
+    command: bun run --watch src/workers/classifier.ts
     env_file: .env
     environment:
       POSTGRES_HOST: postgres
@@ -93,9 +103,7 @@ services:
       REDIS_HOST: redis
       REDIS_CACHE_PORT: 6379
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
+      api:
         condition: service_healthy
 
   worker-draft:
@@ -104,11 +112,13 @@ services:
       - .:/app
       - bun_node_modules:/app/node_modules
       - bun_api_node_modules:/app/apps/api/node_modules
+      - bun_inboxrules_node_modules:/app/apps/inboxrules/node_modules
+      - bun_dashboard_node_modules:/app/apps/dashboard/node_modules
       - bun_sdk_node_modules:/app/packages/sdk/node_modules
       - bun_ui_node_modules:/app/packages/ui/node_modules
       - bun_config_node_modules:/app/packages/config/node_modules
-    working_dir: /app
-    command: sh -c "bun install && cd apps/api && bun run --watch src/workers/draft-generator.ts"
+    working_dir: /app/apps/api
+    command: bun run --watch src/workers/draft-generator.ts
     env_file: .env
     environment:
       POSTGRES_HOST: postgres
@@ -116,19 +126,20 @@ services:
       REDIS_HOST: redis
       REDIS_CACHE_PORT: 6379
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
+      api:
         condition: service_healthy
 
   inboxrules:
     image: node:20-alpine
     ports:
-      - "${INBOXRULES_FRONTEND_PORT:-3004}:3004"
+      - "${INBOXRULES_FRONTEND_PORT:-3004}:${INBOXRULES_FRONTEND_PORT:-3004}"
     volumes:
       - .:/app
       - node_node_modules:/app/node_modules
+      - node_pnpm_store:/app/.pnpm-store
       - node_inboxrules_node_modules:/app/apps/inboxrules/node_modules
+      - node_dashboard_node_modules:/app/apps/dashboard/node_modules
+      - node_api_node_modules:/app/apps/api/node_modules
       - node_sdk_node_modules:/app/packages/sdk/node_modules
       - node_ui_node_modules:/app/packages/ui/node_modules
       - node_config_node_modules:/app/packages/config/node_modules
@@ -137,27 +148,37 @@ services:
     env_file: .env
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_API_PORT:-3005}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${INBOXRULES_FRONTEND_PORT:-3004} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
     depends_on:
       - api
 
   dashboard:
     image: node:20-alpine
     ports:
-      - "${DASHBOARD_FRONTEND_PORT:-3006}:3006"
+      - "${DASHBOARD_FRONTEND_PORT:-3006}:${DASHBOARD_FRONTEND_PORT:-3006}"
     volumes:
       - .:/app
       - node_node_modules:/app/node_modules
+      - node_pnpm_store:/app/.pnpm-store
+      - node_inboxrules_node_modules:/app/apps/inboxrules/node_modules
       - node_dashboard_node_modules:/app/apps/dashboard/node_modules
+      - node_api_node_modules:/app/apps/api/node_modules
       - node_sdk_node_modules:/app/packages/sdk/node_modules
       - node_ui_node_modules:/app/packages/ui/node_modules
       - node_config_node_modules:/app/packages/config/node_modules
     working_dir: /app
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile && cd apps/dashboard && pnpm dev"
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && cd apps/dashboard && pnpm dev"
     env_file: .env
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_API_PORT:-3005}
     depends_on:
-      - api
+      inboxrules:
+        condition: service_healthy
 
 volumes:
   postgres_data:
@@ -165,13 +186,17 @@ volumes:
   # Bun runtime services (api + workers)
   bun_node_modules:
   bun_api_node_modules:
+  bun_inboxrules_node_modules:
+  bun_dashboard_node_modules:
   bun_sdk_node_modules:
   bun_ui_node_modules:
   bun_config_node_modules:
   # Node runtime services (inboxrules + dashboard)
   node_node_modules:
+  node_pnpm_store:
   node_inboxrules_node_modules:
   node_dashboard_node_modules:
+  node_api_node_modules:
   node_sdk_node_modules:
   node_ui_node_modules:
   node_config_node_modules:
