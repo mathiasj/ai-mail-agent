@@ -21,6 +21,15 @@ export async function signToken(payload: JWTPayload): Promise<string> {
     .sign(secret);
 }
 
+export async function signSseToken(userId: string): Promise<string> {
+  return new SignJWT({ sub: userId, scope: 'sse' } as unknown as Record<string, unknown>)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setIssuer(ISSUER)
+    .setExpirationTime('1h')
+    .sign(secret);
+}
+
 export async function verifyToken(token: string): Promise<JWTPayload> {
   const { payload } = await jwtVerify(token, secret, {
     issuer: ISSUER,

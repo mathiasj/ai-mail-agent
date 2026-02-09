@@ -16,6 +16,7 @@ export default function FilteringRulesPage() {
     classify: '',
     archive: false,
     mark_read: false,
+    webhook: '',
   });
   const [creating, setCreating] = useState(false);
 
@@ -42,13 +43,14 @@ export default function FilteringRulesPage() {
           ...(form.classify && { classify: form.classify }),
           ...(form.archive && { archive: true }),
           ...(form.mark_read && { mark_read: true }),
+          ...(form.webhook && { webhook: form.webhook }),
         },
         enabled: true,
         priority: 0,
       });
       setRules((prev) => [result.rule, ...prev]);
       setShowCreate(false);
-      setForm({ name: '', fromDomain: '', fromRegex: '', subject_contains: '', subjectRegex: '', classify: '', archive: false, mark_read: false });
+      setForm({ name: '', fromDomain: '', fromRegex: '', subject_contains: '', subjectRegex: '', classify: '', archive: false, mark_read: false, webhook: '' });
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -169,6 +171,18 @@ export default function FilteringRulesPage() {
             </label>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Webhook URL (optional)</label>
+            <input
+              type="url"
+              value={form.webhook}
+              onChange={(e) => setForm((f) => ({ ...f, webhook: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              placeholder="https://your-agent.example.com/webhook"
+            />
+            <p className="text-xs text-gray-400 mt-1">Receive HTTP POST when this rule matches</p>
+          </div>
+
           <button
             type="submit"
             disabled={creating}
@@ -192,6 +206,13 @@ export default function FilteringRulesPage() {
                   {rule.conditions.subject_contains && <span>Subject: {rule.conditions.subject_contains}</span>}
                   {rule.actions.classify && <span>Classify: {rule.actions.classify}</span>}
                   {rule.actions.archive && <span>Archive</span>}
+                  {rule.actions.webhook && (
+                    <span title={rule.actions.webhook}>
+                      Webhook: {rule.actions.webhook.length > 40
+                        ? rule.actions.webhook.slice(0, 40) + '...'
+                        : rule.actions.webhook}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-3">

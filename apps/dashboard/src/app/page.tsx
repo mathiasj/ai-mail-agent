@@ -44,6 +44,9 @@ export default function DashboardLandingPage() {
             <a href="#features" className="text-sm text-gray-600 hover:text-gray-900">
               Features
             </a>
+            <a href="#integrations" className="text-sm text-gray-600 hover:text-gray-900">
+              Integrations
+            </a>
             <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">
               Log in
             </Link>
@@ -110,6 +113,115 @@ export default function DashboardLandingPage() {
               <p className="text-gray-600 text-sm">{feature.description}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Integrations / OpenClaw Showcase */}
+      <section
+        id="integrations"
+        className="bg-gradient-to-br from-brand-50 via-white to-indigo-50 py-24"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-4">
+            Built for AI Agent Platforms
+          </h2>
+          <p className="text-gray-600 text-center mb-16 max-w-xl mx-auto">
+            Connect your AI agents to MailGate.ai via real-time SSE or webhook callbacks.
+          </p>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Left: Value props */}
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">AI Agent Integration</h3>
+                <p className="text-gray-600 text-sm">
+                  Platforms like OpenClaw connect via SSE, receiving email events in real-time.
+                  No public URL needed — your agent initiates an outbound connection.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Secure Token Exchange</h3>
+                <p className="text-gray-600 text-sm">
+                  Exchange your long-lived API key for a short-lived SSE token.
+                  Credentials never appear in URLs or query strings.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Webhook Callbacks</h3>
+                <p className="text-gray-600 text-sm">
+                  Cloud-hosted agents receive HTTP POST callbacks with HMAC-SHA256 signatures
+                  when filtering rules match incoming email.
+                </p>
+              </div>
+            </div>
+
+            {/* Right: Code example */}
+            <div className="bg-gray-900 text-gray-100 rounded-xl p-6 font-mono text-sm overflow-x-auto">
+              <p className="text-gray-400 mb-3">{'// 1. Exchange API key for SSE token'}</p>
+              <p>
+                <span className="text-blue-400">const</span>{' '}
+                <span className="text-yellow-300">{'{ token }'}</span> ={' '}
+                <span className="text-blue-400">await</span> fetch(
+              </p>
+              <p className="pl-4">
+                <span className="text-green-400">{'"https://api.mailgate.ai/v1/auth/sse-token"'}</span>,
+              </p>
+              <p className="pl-4">
+                {'{ method: '}
+                <span className="text-green-400">{'"POST"'}</span>
+                {', headers: { '}
+                <span className="text-green-400">{'"X-API-Key"'}</span>
+                {': key } }'}
+              </p>
+              <p>{')'}.json();</p>
+
+              <p className="text-gray-400 mt-4 mb-3">{'// 2. Connect to SSE stream'}</p>
+              <p>
+                <span className="text-blue-400">const</span> es ={' '}
+                <span className="text-blue-400">new</span>{' '}
+                <span className="text-yellow-300">EventSource</span>(
+              </p>
+              <p className="pl-4">
+                <span className="text-green-400">{`\`https://api.mailgate.ai/v1/events/stream?token=\${token}\``}</span>
+              </p>
+              <p>);</p>
+
+              <p className="text-gray-400 mt-4 mb-3">{'// 3. Handle real-time events'}</p>
+              <p>
+                es.addEventListener(<span className="text-green-400">{'"new_email"'}</span>, (e) ={'> {'}
+              </p>
+              <p className="pl-4">
+                <span className="text-blue-400">const</span> email = JSON.parse(e.data);
+              </p>
+              <p className="pl-4">
+                processIncomingEmail(email);
+              </p>
+              <p>{'}'});</p>
+
+              <p className="text-gray-400 mt-6 mb-3">{'// Webhook payload (for cloud agents)'}</p>
+              <p>{'{'}</p>
+              <p className="pl-4">
+                <span className="text-green-400">{'"event"'}</span>:{' '}
+                <span className="text-green-400">{'"email.filtered"'}</span>,
+              </p>
+              <p className="pl-4">
+                <span className="text-green-400">{'"email"'}</span>: {'{ id, from, subject }'},
+              </p>
+              <p className="pl-4">
+                <span className="text-green-400">{'"rule"'}</span>: {'{ id, name }'}
+              </p>
+              <p>{'}'}</p>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link
+              href="/signup"
+              className="bg-brand-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:bg-brand-700 transition"
+            >
+              Start Integrating
+            </Link>
+          </div>
         </div>
       </section>
 

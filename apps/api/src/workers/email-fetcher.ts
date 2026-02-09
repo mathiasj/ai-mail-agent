@@ -4,6 +4,7 @@ import { db } from '../db/client';
 import { emails, gmailAccounts } from '../db/schema';
 import { getAccessToken, getGmailClient } from '../auth/gmail-oauth';
 import { parseGmailMessage } from '../core/email-parser';
+import { notifyUser } from '../api/routes/sse';
 import { classifyQueue, redisConnection } from './queue';
 
 const worker = new Worker(
@@ -125,6 +126,11 @@ async function fetchAndStoreMessage(
     .returning();
 
   if (inserted) {
+    notifyUser(userId, {
+      type: 'new_email',
+      data: { id: inserted.id, from: parsed.from, subject: parsed.subject, receivedAt: parsed.date },
+    });
+
     // Queue classification
     await classifyQueue.add('classify-email', {
       emailId: inserted.id,

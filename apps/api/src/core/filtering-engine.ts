@@ -2,12 +2,13 @@ import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../db/client';
 import { emails, filteringRules, type FilteringConditions, type FilteringActions } from '../db/schema';
 
-interface FilteringResult {
+export interface FilteringResult {
   matched: boolean;
   category?: string;
   priority?: number;
   actions?: FilteringActions;
   ruleName?: string;
+  ruleId?: string;
 }
 
 export async function tryRuleBasedFiltering(
@@ -70,6 +71,7 @@ export async function tryRuleBasedFiltering(
         priority,
         actions: rule.actions,
         ruleName: rule.name,
+        ruleId: rule.id,
       };
     }
   }

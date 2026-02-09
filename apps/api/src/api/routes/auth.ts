@@ -4,8 +4,9 @@ import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { users, gmailAccounts } from '../../db/schema';
-import { signToken } from '../../auth/jwt';
+import { signToken, signSseToken } from '../../auth/jwt';
 import { authMiddleware } from '../../auth/middleware';
+import { requirePermission } from '../middleware/permissions';
 import {
   getGmailAuthUrl,
   handleGmailCallback,
@@ -107,6 +108,14 @@ app.get('/me', authMiddleware, async (c) => {
 
   if (!user) return c.json({ error: 'User not found' }, 404);
   return c.json({ user: { ...user, tier: user.inboxrulesTier } });
+});
+
+// ─── SSE Token Exchange ──────────────────────────────────────────────
+
+app.post('/sse-token', authMiddleware, requirePermission('read'), async (c) => {
+  const { sub } = c.get('user');
+  const token = await signSseToken(sub);
+  return c.json({ token, expiresIn: 3600 });
 });
 
 // ─── Gmail OAuth ─────────────────────────────────────────────────────

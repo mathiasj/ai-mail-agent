@@ -5,6 +5,7 @@ import { google } from 'googleapis';
 import { db } from '../db/client';
 import { emails, drafts, gmailAccounts } from '../db/schema';
 import { getAccessToken, getGmailClient } from '../auth/gmail-oauth';
+import { notifyUser } from '../api/routes/sse';
 import { redisConnection } from './queue';
 import { env } from '../config/env';
 
@@ -77,6 +78,11 @@ const worker = new Worker(
       .returning();
 
     console.log(`Draft ${draft.id} generated for email ${emailId}`);
+
+    notifyUser(userId, {
+      type: 'draft_generated',
+      data: { draftId: draft.id, emailId, preview: draftContent.slice(0, 200) },
+    });
 
     // If auto-send is approved, send immediately
     if (autoSend && email.account) {

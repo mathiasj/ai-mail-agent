@@ -5,7 +5,9 @@ import { db } from '../db/client';
 import { emails, users } from '../db/schema';
 import { applyRules } from '../core/rules-engine';
 import { tryRuleBasedFiltering } from '../core/filtering-engine';
+import { dispatchWebhook, type WebhookPayload } from '../core/webhook-dispatcher';
 import { checkCanUseAIClassification } from '../core/usage-limits';
+import { notifyUser } from '../api/routes/sse';
 import { redisConnection } from './queue';
 import { env } from '../config/env';
 
@@ -61,6 +63,36 @@ const worker = new Worker(
       console.log(
         `Email ${emailId} matched filtering rule "${filterResult.ruleName}": ${filterResult.category}`
       );
+      notifyUser(userId, {
+        type: 'email_classified',
+        data: { emailId, category: filterResult.category, priority: filterResult.priority, method: 'rule' },
+      });
+
+      // Dispatch webhook if configured on the matching rule
+      if (filterResult.actions?.webhook) {
+        const webhookPayload: WebhookPayload = {
+          event: 'email.filtered',
+          timestamp: new Date().toISOString(),
+          email: {
+            id: emailId,
+            from: email.from,
+            to: email.to,
+            subject: email.subject,
+            snippet: email.snippet || '',
+            receivedAt: email.receivedAt.toISOString(),
+          },
+          classification: filterResult.category
+            ? { category: filterResult.category, priority: filterResult.priority ?? 5 }
+            : undefined,
+          rule: filterResult.ruleId
+            ? { id: filterResult.ruleId, name: filterResult.ruleName! }
+            : undefined,
+        };
+        dispatchWebhook(filterResult.actions.webhook, webhookPayload).catch((err) =>
+          console.error('Webhook dispatch error:', err)
+        );
+      }
+
       // Apply user automation rules after rule-based filtering
       await applyRules(emailId, userId);
       return;
@@ -118,6 +150,11 @@ const worker = new Worker(
     console.log(
       `Classified email ${emailId} (AI): ${result.category} (priority ${result.priority})`
     );
+
+    notifyUser(userId, {
+      type: 'email_classified',
+      data: { emailId, category: result.category, priority: result.priority, method: 'ai' },
+    });
 
     // Apply user rules after classification
     await applyRules(emailId, userId);

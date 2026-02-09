@@ -40,7 +40,7 @@ Shared backend powers both products. Users connect Gmail accounts; AI classifies
 │   │   ├── src/
 │   │   │   ├── api/
 │   │   │   │   ├── routes/
-│   │   │   │   │   ├── auth.ts          # Signup, login, Gmail OAuth
+│   │   │   │   │   ├── auth.ts          # Signup, login, Gmail OAuth, SSE token exchange
 │   │   │   │   │   ├── emails.ts        # List, search, get, archive
 │   │   │   │   │   ├── drafts.ts        # Generate, edit, approve/send
 │   │   │   │   │   ├── rules.ts         # Automation rules CRUD
@@ -65,6 +65,7 @@ Shared backend powers both products. Users connect Gmail accounts; AI classifies
 │   │   │   │   ├── email-parser.ts    # Gmail message parser
 │   │   │   │   ├── rules-engine.ts    # Automation rule execution
 │   │   │   │   ├── filtering-engine.ts # Rule-based email filtering
+│   │   │   │   ├── webhook-dispatcher.ts # Webhook HTTP POST with HMAC + retries
 │   │   │   │   └── usage-limits.ts    # Tier limits + usage checks
 │   │   │   ├── db/
 │   │   │   │   ├── schema.ts          # Drizzle schema (9 tables)
@@ -134,6 +135,7 @@ GET    /v1/auth/gmail/connect        # Start Gmail OAuth
 GET    /v1/auth/gmail/callback       # Gmail OAuth callback
 GET    /v1/auth/gmail/accounts       # List connected accounts
 DELETE /v1/auth/gmail/accounts/:id   # Disconnect account
+POST   /v1/auth/sse-token            # Exchange API key → short-lived SSE token (1h)
 
 # Emails
 GET    /v1/emails                    # List (paginated, filterable, searchable)
@@ -201,14 +203,13 @@ Two auth methods (middleware tries API key first, falls back to JWT):
 ## Email Processing Pipeline
 
 ```
-Gmail Webhook → emailQueue (fetch)
+Gmail Webhook → emailQueue (fetch) → SSE: new_email
   → classifyQueue:
-    1. Rule-based filtering (free, all tiers)
-    2. AI classification (GPT-4o-mini, paid tiers only)
+    1. Rule-based filtering (free, all tiers) → SSE: email_classified + webhook dispatch
+    2. AI classification (GPT-4o-mini, paid tiers only) → SSE: email_classified
     3. Leave uncategorized (free tier, no rule match)
   → rules engine (user automation rules)
-  → draftQueue (GPT-4o, if auto-reply enabled)
-  → SSE notify
+  → draftQueue (GPT-4o, if auto-reply enabled) → SSE: draft_generated
 ```
 
 ## Pricing Tiers
@@ -351,8 +352,16 @@ docker-compose -f docker-compose.prod.yml up -d  # Start all (prod)
 - [x] All "AI Mail Agent" → "Inboxrules" branding
 - [x] Layout, navbar, landing page, login, signup updated
 
+### OpenClaw Integration — COMPLETE
+- [x] SSE token exchange endpoint (POST /v1/auth/sse-token)
+- [x] SSE notifications wired into all workers (email-fetcher, classifier, draft-generator)
+- [x] Webhook dispatcher with HMAC-SHA256 signing and retry logic
+- [x] Webhook dispatch on filtering rule match in classifier
+- [x] FilteringResult extended with ruleId
+- [x] Dashboard filtering rules: webhook URL field
+- [x] Landing page: OpenClaw/integrations showcase section
+
 ### Deferred
 - [ ] Monitoring (Langfuse, Sentry) — add when deploying
 - [ ] Dual billing checkout (separate Stripe products per app)
 - [ ] PII filtering for API responses
-- [ ] OpenClaw agent routing
