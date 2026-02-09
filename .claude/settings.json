@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git remote:*)",
+      "Bash(git init:*)",
+      "Bash(git rm:*)",
+      "Bash(gh:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm ls:*)",
+      "Bash(pnpm db:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm --filter:*)",
+      "Bash(bun run:*)",
+      "Bash(bun install:*)",
+      "Bash(bun build:*)",
+      "Bash(bunx:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker-compose -f:*)",
+      "Bash(docker exec:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(lsof:*)",
+      "Bash(sleep:*)",
+      "Bash(railway:*)"
+    ]
+  }
+}
