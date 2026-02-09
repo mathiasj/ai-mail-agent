@@ -35,8 +35,8 @@ app.use(
   cors({
     origin: [
       env.APP_URL,
-      'http://localhost:3004',
-      'http://localhost:3006',
+      `http://localhost:${env.INBOXRULES_FRONTEND_PORT}`,
+      `http://localhost:${env.DASHBOARD_FRONTEND_PORT}`,
     ],
     credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

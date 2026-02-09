@@ -38,11 +38,13 @@ const envSchema = z.object({
   REDIS_CACHE_PORT: z.coerce.number().default(6379),
   REDIS_HOST: z.string().default('localhost'),
   BACKEND_API_PORT: z.coerce.number().default(3005),
+  INBOXRULES_FRONTEND_PORT: z.coerce.number().default(3004),
+  DASHBOARD_FRONTEND_PORT: z.coerce.number().default(3006),
 
   JWT_SECRET: z.string().min(16),
   GMAIL_CLIENT_ID: z.string().default(''),
   GMAIL_CLIENT_SECRET: z.string().default(''),
-  GMAIL_REDIRECT_URI: z.string().default('http://localhost:3005/api/auth/gmail/callback'),
+  GMAIL_REDIRECT_URI: z.string().optional(),
   GOOGLE_CLOUD_PROJECT_ID: z.string().default(''),
   GMAIL_PUBSUB_TOPIC: z.string().default(''),
   OPENAI_API_KEY: z.string().default(''),
@@ -57,6 +59,7 @@ export type Env = z.infer<typeof envSchema> & {
   DATABASE_URL: string;
   REDIS_URL: string;
   APP_URL: string;
+  GMAIL_REDIRECT_URI: string;
 };
 
 function loadEnv(): Env {
@@ -66,11 +69,13 @@ function loadEnv(): Env {
     throw new Error('Invalid environment variables');
   }
   const data = result.data;
+  const appUrl = data.APP_URL || `http://localhost:${data.BACKEND_API_PORT}`;
   return {
     ...data,
     DATABASE_URL: data.DATABASE_URL || `postgresql://${data.POSTGRES_USER}:${data.POSTGRES_PASSWORD}@${data.POSTGRES_HOST}:${data.POSTGRES_DB_PORT}/${data.POSTGRES_DB_NAME}`,
     REDIS_URL: data.REDIS_URL || `redis://${data.REDIS_HOST}:${data.REDIS_CACHE_PORT}`,
-    APP_URL: data.APP_URL || `http://localhost:${data.BACKEND_API_PORT}`,
+    APP_URL: appUrl,
+    GMAIL_REDIRECT_URI: data.GMAIL_REDIRECT_URI || `${appUrl}/api/auth/gmail/callback`,
   };
 }
 

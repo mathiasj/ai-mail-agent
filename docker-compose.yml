@@ -41,7 +41,7 @@ services:
       - bun_ui_node_modules:/app/packages/ui/node_modules
       - bun_config_node_modules:/app/packages/config/node_modules
     working_dir: /app
-    command: sh -c "bun install || true; cd apps/api && bun run --watch src/index.ts"
+    command: sh -c "bun install || true; cd apps/api && bunx drizzle-kit push && bun run --watch src/index.ts"
     env_file: .env
     environment:
       POSTGRES_HOST: postgres
