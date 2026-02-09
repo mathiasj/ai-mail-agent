@@ -42,8 +42,10 @@ services:
     command: sh -c "bun install && cd apps/api && bun run --watch src/index.ts"
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_mail_agent
-      REDIS_URL: redis://redis:6379
+      POSTGRES_HOST: postgres
+      POSTGRES_DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_CACHE_PORT: 6379
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,8 +65,10 @@ services:
     command: sh -c "bun install && cd apps/api && bun run --watch src/workers/email-fetcher.ts"
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_mail_agent
-      REDIS_URL: redis://redis:6379
+      POSTGRES_HOST: postgres
+      POSTGRES_DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_CACHE_PORT: 6379
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,8 +88,10 @@ services:
     command: sh -c "bun install && cd apps/api && bun run --watch src/workers/classifier.ts"
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_mail_agent
-      REDIS_URL: redis://redis:6379
+      POSTGRES_HOST: postgres
+      POSTGRES_DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_CACHE_PORT: 6379
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,8 +111,10 @@ services:
     command: sh -c "bun install && cd apps/api && bun run --watch src/workers/draft-generator.ts"
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_mail_agent
-      REDIS_URL: redis://redis:6379
+      POSTGRES_HOST: postgres
+      POSTGRES_DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_CACHE_PORT: 6379
     depends_on:
       postgres:
         condition: service_healthy

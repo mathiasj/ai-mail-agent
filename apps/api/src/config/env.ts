@@ -4,7 +4,7 @@ import { resolve } from 'path';
 
 // Bun auto-loads .env from cwd, but in a monorepo cwd is apps/api/
 // while .env lives at the repo root. Load it explicitly if needed.
-if (!process.env.DATABASE_URL) {
+if (!process.env.JWT_SECRET) {
   const rootEnv = resolve(import.meta.dir, '../../../../.env');
   if (existsSync(rootEnv)) {
     const file = Bun.file(rootEnv);
@@ -24,8 +24,21 @@ if (!process.env.DATABASE_URL) {
 }
 
 const envSchema = z.object({
-  DATABASE_URL: z.string(),
-  REDIS_URL: z.string(),
+  // Explicit URLs (prod/Railway) — if set, override derived values
+  DATABASE_URL: z.string().optional(),
+  REDIS_URL: z.string().optional(),
+  APP_URL: z.string().optional(),
+
+  // Individual components (dev) — used to derive URLs if not set explicitly
+  POSTGRES_DB_PORT: z.coerce.number().default(5433),
+  POSTGRES_USER: z.string().default('postgres'),
+  POSTGRES_PASSWORD: z.string().default('postgres'),
+  POSTGRES_DB_NAME: z.string().default('ai_mail_agent'),
+  POSTGRES_HOST: z.string().default('localhost'),
+  REDIS_CACHE_PORT: z.coerce.number().default(6379),
+  REDIS_HOST: z.string().default('localhost'),
+  BACKEND_API_PORT: z.coerce.number().default(3005),
+
   JWT_SECRET: z.string().min(16),
   GMAIL_CLIENT_ID: z.string().default(''),
   GMAIL_CLIENT_SECRET: z.string().default(''),
@@ -37,12 +50,14 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().default(''),
   STRIPE_PRICE_PRO: z.string().default(''),
   STRIPE_PRICE_TEAM: z.string().default(''),
-  APP_URL: z.string().optional(),
-  BACKEND_API_PORT: z.coerce.number().default(3005),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 
-export type Env = z.infer<typeof envSchema> & { APP_URL: string };
+export type Env = z.infer<typeof envSchema> & {
+  DATABASE_URL: string;
+  REDIS_URL: string;
+  APP_URL: string;
+};
 
 function loadEnv(): Env {
   const result = envSchema.safeParse(process.env);
@@ -53,6 +68,8 @@ function loadEnv(): Env {
   const data = result.data;
   return {
     ...data,
+    DATABASE_URL: data.DATABASE_URL || `postgresql://${data.POSTGRES_USER}:${data.POSTGRES_PASSWORD}@${data.POSTGRES_HOST}:${data.POSTGRES_DB_PORT}/${data.POSTGRES_DB_NAME}`,
+    REDIS_URL: data.REDIS_URL || `redis://${data.REDIS_HOST}:${data.REDIS_CACHE_PORT}`,
     APP_URL: data.APP_URL || `http://localhost:${data.BACKEND_API_PORT}`,
   };
 }
