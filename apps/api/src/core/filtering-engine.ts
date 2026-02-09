@@ -77,7 +77,7 @@ export async function tryRuleBasedFiltering(
   return { matched: false };
 }
 
-function matchesFilteringConditions(
+export function matchesFilteringConditions(
   email: typeof emails.$inferSelect,
   conditions: FilteringConditions
 ): boolean {
@@ -143,7 +143,7 @@ function matchesFilteringConditions(
   return true;
 }
 
-function extractDomain(emailAddress: string): string | null {
+export function extractDomain(emailAddress: string): string | null {
   // Handle "Name <email@domain.com>" format
   const match = emailAddress.match(/@([^>]+)/);
   return match ? match[1].trim() : null;

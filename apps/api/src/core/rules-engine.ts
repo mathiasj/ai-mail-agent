@@ -24,7 +24,7 @@ export async function applyRules(emailId: string, userId: string): Promise<void>
   }
 }
 
-function matchesConditions(
+export function matchesConditions(
   email: typeof emails.$inferSelect,
   conditions: RuleConditions
 ): boolean {

@@ -27,7 +27,7 @@ export function parseGmailMessage(message: any): ParsedEmail {
   };
 }
 
-function extractBody(payload: any): string {
+export function extractBody(payload: any): string {
   if (!payload) return '';
 
   // Simple text body
@@ -66,12 +66,12 @@ function extractBody(payload: any): string {
   return '';
 }
 
-function decodeBase64Url(encoded: string): string {
+export function decodeBase64Url(encoded: string): string {
   const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
   return Buffer.from(base64, 'base64').toString('utf-8');
 }
 
-function stripHtml(html: string): string {
+export function stripHtml(html: string): string {
   return html
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')

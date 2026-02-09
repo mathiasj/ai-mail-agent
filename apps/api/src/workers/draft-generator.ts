@@ -132,7 +132,7 @@ export async function sendDraft(draftId: string): Promise<void> {
   console.log(`Draft ${draftId} sent successfully`);
 }
 
-function createRawEmail(params: {
+export function createRawEmail(params: {
   to: string;
   subject: string;
   body: string;
