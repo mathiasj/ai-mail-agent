@@ -1,8 +1,8 @@
-import type { MailGateClient } from '../client';
+import type { MailgateClient } from '../client';
 import type { Email, Pagination } from '../types';
 
 export class EmailsResource {
-  constructor(private client: MailGateClient) {}
+  constructor(private client: MailgateClient) {}
 
   async list(params: Record<string, string> = {}) {
     const query = new URLSearchParams(params).toString();
@@ -27,5 +27,22 @@ export class EmailsResource {
     return this.client.request<{ categories: any[]; unread: number }>(
       '/api/emails/stats/overview'
     );
+  }
+
+  async classify(id: string, data: {
+    category: string;
+    priority: number;
+    summary?: string;
+    entities?: {
+      people?: string[];
+      companies?: string[];
+      dates?: string[];
+      amounts?: string[];
+    };
+  }) {
+    return this.client.request(`/api/emails/${id}/classify`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 }

@@ -4,45 +4,46 @@ import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { drafts, emails } from '../../db/schema';
 import { authMiddleware } from '../../auth/middleware';
-import { draftQueue } from '../../workers/queue';
+import { requirePermission } from '../middleware/permissions';
 import { sendDraft } from '../../workers/draft-generator';
-import { checkCanGenerateDraft } from '../../core/usage-limits';
+import { notifyUser } from './sse';
 
 const app = new Hono();
 
 app.use('*', authMiddleware);
 
-// ─── Generate draft for an email ─────────────────────────────────────
+// ─── Create draft (external write) ──────────────────────────────────
 
-app.post('/generate', async (c) => {
-  const { sub, tier } = c.get('user');
-  const { emailId, template } = await c.req.json();
+const createDraftSchema = z.object({
+  emailId: z.string().uuid(),
+  content: z.string().min(1),
+});
 
-  if (!emailId) {
-    return c.json({ error: 'emailId is required' }, 400);
-  }
+app.post('/', requirePermission('write'), async (c) => {
+  const { sub } = c.get('user');
+  const body = createDraftSchema.parse(await c.req.json());
 
-  // Check draft limits
-  const canGenerate = await checkCanGenerateDraft(sub, tier);
-  if (!canGenerate) {
-    return c.json({ error: 'Draft limit reached for your plan. Upgrade to generate more.' }, 429);
-  }
-
-  // Verify email belongs to user
   const email = await db.query.emails.findFirst({
-    where: and(eq(emails.id, emailId), eq(emails.userId, sub)),
+    where: and(eq(emails.id, body.emailId), eq(emails.userId, sub)),
   });
 
   if (!email) return c.json({ error: 'Email not found' }, 404);
 
-  await draftQueue.add('generate-reply', {
-    emailId,
-    userId: sub,
-    autoSend: false,
-    template,
+  const [draft] = await db
+    .insert(drafts)
+    .values({
+      emailId: body.emailId,
+      userId: sub,
+      content: body.content,
+    })
+    .returning();
+
+  notifyUser(sub, {
+    type: 'draft_generated',
+    data: { draftId: draft.id, emailId: body.emailId, preview: body.content.slice(0, 200) },
   });
 
-  return c.json({ message: 'Draft generation queued' }, 202);
+  return c.json({ draft }, 201);
 });
 
 // ─── List drafts ─────────────────────────────────────────────────────

@@ -1,10 +1,10 @@
-# MailGate.ai + Inboxrules — Monorepo
+# Mailgate.ai + Inboxrules — Monorepo
 
 ## Project Overview
 
 Dual-product Turborepo monorepo:
-- **MailGate.ai** — B2B email API infrastructure for AI agents (developer portal)
-- **Inboxrules** — B2C consumer email client (built on MailGate.ai API)
+- **Mailgate.ai** — B2B email API infrastructure for AI agents (developer portal)
+- **Inboxrules** — B2C consumer email client (built on Mailgate.ai API)
 
 Shared backend powers both products. Users connect Gmail accounts; AI classifies, summarizes, drafts replies, and auto-responds via smart rules.
 
@@ -103,7 +103,7 @@ Shared backend powers both products. Users connect Gmail accounts; AI classifies
     │   └── tailwind/          # base.ts (brand indigo palette)
     ├── sdk/                   # @mailgate/sdk — TypeScript API client
     │   └── src/
-    │       ├── client.ts      # MailGateClient (API key + Bearer auth)
+    │       ├── client.ts      # MailgateClient (API key + Bearer auth)
     │       ├── types.ts       # Shared types
     │       └── resources/     # auth, emails, drafts, rules, api-keys, accounts
     └── ui/                    # @mailgate/ui — Shared React components

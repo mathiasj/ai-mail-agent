@@ -1,4 +1,4 @@
-export { MailGateClient, type MailGateClientOptions } from './client';
+export { MailgateClient, type MailgateClientOptions } from './client';
 export { AuthResource } from './resources/auth';
 export { EmailsResource } from './resources/emails';
 export { DraftsResource } from './resources/drafts';

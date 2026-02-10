@@ -102,14 +102,3 @@ export async function checkCanAutoReply(tier: string): Promise<boolean> {
   return getTierLimits(tier).autoReply;
 }
 
-// Dashboard tier limits for AI classification quotas
-const DASHBOARD_TIER_AI_LIMITS: Record<string, boolean> = {
-  free: false,
-  pro: true,
-  team: true,
-  enterprise: true,
-};
-
-export async function checkCanUseAIClassification(tier: string): Promise<boolean> {
-  return DASHBOARD_TIER_AI_LIMITS[tier] ?? false;
-}

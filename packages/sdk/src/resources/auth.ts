@@ -1,8 +1,8 @@
-import type { MailGateClient } from '../client';
+import type { MailgateClient } from '../client';
 import type { GmailAccount } from '../types';
 
 export class AuthResource {
-  constructor(private client: MailGateClient) {}
+  constructor(private client: MailgateClient) {}
 
   async signup(email: string, password: string, name?: string) {
     return this.client.request<{ token: string; user: any }>('/api/auth/signup', {

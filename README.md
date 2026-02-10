@@ -1,9 +1,9 @@
-# MailGate.ai + Inboxrules
+# Mailgate.ai + Inboxrules
 
 Dual-product Turborepo monorepo:
 
-- **MailGate.ai** — B2B email API infrastructure for AI agents (developer portal)
-- **Inboxrules** — B2C consumer email client (built on MailGate.ai API)
+- **Mailgate.ai** — B2B email API infrastructure for AI agents (developer portal)
+- **Inboxrules** — B2C consumer email client (built on Mailgate.ai API)
 
 Shared backend powers both products. Connect Gmail accounts, classify with AI or rules, generate drafts, dispatch webhooks, and stream events in real-time.
 
@@ -134,7 +134,7 @@ GET  /v1/events/stream?token=<jwt>          → SSE stream
 
 **Webhooks (cloud agents with public URL):**
 - Configure webhook URL on a filtering rule
-- HTTP POST with `X-MailGate-Signature` (HMAC-SHA256) + `X-MailGate-Event` header
+- HTTP POST with `X-Mailgate-Signature` (HMAC-SHA256) + `X-Mailgate-Event` header
 - 3 retries with exponential backoff on 5xx
 
 ### Categories

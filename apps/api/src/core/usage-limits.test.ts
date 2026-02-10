@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { getTierLimits, checkCanAutoReply, checkCanUseAIClassification } from './usage-limits';
+import { getTierLimits, checkCanAutoReply } from './usage-limits';
 
 describe('getTierLimits', () => {
   test('free tier has correct limits', () => {
@@ -57,27 +57,5 @@ describe('checkCanAutoReply', () => {
 
   test('returns true for enterprise tier', async () => {
     expect(await checkCanAutoReply('enterprise')).toBe(true);
-  });
-});
-
-describe('checkCanUseAIClassification', () => {
-  test('returns false for free tier', async () => {
-    expect(await checkCanUseAIClassification('free')).toBe(false);
-  });
-
-  test('returns true for pro tier', async () => {
-    expect(await checkCanUseAIClassification('pro')).toBe(true);
-  });
-
-  test('returns true for team tier', async () => {
-    expect(await checkCanUseAIClassification('team')).toBe(true);
-  });
-
-  test('returns true for enterprise tier', async () => {
-    expect(await checkCanUseAIClassification('enterprise')).toBe(true);
-  });
-
-  test('returns false for unknown tier', async () => {
-    expect(await checkCanUseAIClassification('unknown')).toBe(false);
   });
 });

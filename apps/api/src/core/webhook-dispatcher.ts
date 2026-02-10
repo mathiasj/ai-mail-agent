@@ -39,8 +39,8 @@ export async function dispatchWebhook(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-MailGate-Signature': signature,
-          'X-MailGate-Event': payload.event,
+          'X-Mailgate-Signature': signature,
+          'X-Mailgate-Event': payload.event,
         },
         body,
       });

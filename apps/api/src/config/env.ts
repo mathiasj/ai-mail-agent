@@ -47,7 +47,6 @@ const envSchema = z.object({
   GMAIL_REDIRECT_URI: z.string().optional(),
   GOOGLE_CLOUD_PROJECT_ID: z.string().default(''),
   GMAIL_PUBSUB_TOPIC: z.string().default(''),
-  OPENAI_API_KEY: z.string().default(''),
   STRIPE_SECRET_KEY: z.string().default(''),
   STRIPE_WEBHOOK_SECRET: z.string().default(''),
   WEBHOOK_SECRET: z.string().default('whsec_dev_default'),

@@ -1,8 +1,15 @@
-import type { MailGateClient } from '../client';
+import type { MailgateClient } from '../client';
 import type { Draft } from '../types';
 
 export class DraftsResource {
-  constructor(private client: MailGateClient) {}
+  constructor(private client: MailgateClient) {}
+
+  async create(data: { emailId: string; content: string }) {
+    return this.client.request<{ draft: Draft }>('/api/drafts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 
   async generate(emailId: string, template?: string) {
     return this.client.request('/api/drafts/generate', {

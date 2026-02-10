@@ -1,7 +1,7 @@
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../db/client';
 import { emails, rules, type RuleConditions, type RuleActions } from '../db/schema';
-import { draftQueue } from '../workers/queue';
+import { notifyUser } from '../api/routes/sse';
 import { canAutoReply } from './auto-reply-safety';
 
 export async function applyRules(emailId: string, userId: string): Promise<void> {
@@ -76,11 +76,10 @@ async function executeActions(
     // Safety check before auto-replying
     const safety = await canAutoReply(email.userId, email.from);
     if (safety.allowed) {
-      await draftQueue.add('generate-reply', {
-        emailId: email.id,
-        userId: email.userId,
-        autoSend: false, // Always require human approval
-        template: actions.reply_template,
+      // Notify via SSE — external AI agent handles draft generation
+      notifyUser(email.userId, {
+        type: 'auto_reply_triggered',
+        data: { emailId: email.id, template: actions.reply_template },
       });
     } else {
       console.log(`Auto-reply blocked for email ${email.id}: ${safety.reason}`);

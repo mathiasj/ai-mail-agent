@@ -1,8 +1,8 @@
-import type { MailGateClient } from '../client';
+import type { MailgateClient } from '../client';
 import type { ApiKey, ApiKeyPermissions } from '../types';
 
 export class ApiKeysResource {
-  constructor(private client: MailGateClient) {}
+  constructor(private client: MailgateClient) {}
 
   async list() {
     return this.client.request<{ apiKeys: ApiKey[] }>('/api/api-keys');

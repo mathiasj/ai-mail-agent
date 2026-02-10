@@ -42,7 +42,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       <aside className="w-64 border-r bg-gray-50 flex flex-col">
         <div className="p-4 border-b">
           <Link href="/overview" className="text-lg font-bold text-brand-600">
-            MailGate.ai
+            Mailgate.ai
           </Link>
           <p className="text-xs text-gray-400 mt-0.5">Developer Portal</p>
         </div>

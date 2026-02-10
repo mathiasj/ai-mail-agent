@@ -54,7 +54,7 @@ export default function SettingsPage() {
       <section className="border rounded-xl p-6">
         <h2 className="text-lg font-semibold mb-2">Webhook Secret</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Used to verify webhook payloads via HMAC-SHA256 signature in the <code className="bg-gray-100 px-1 rounded">X-MailGate-Signature</code> header.
+          Used to verify webhook payloads via HMAC-SHA256 signature in the <code className="bg-gray-100 px-1 rounded">X-Mailgate-Signature</code> header.
         </p>
         <div className="flex items-center gap-2">
           <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm font-mono select-all overflow-hidden">

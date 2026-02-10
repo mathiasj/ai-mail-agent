@@ -4,6 +4,9 @@ import { eq, and, desc, asc, sql, ilike, or } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { emails } from '../../db/schema';
 import { authMiddleware } from '../../auth/middleware';
+import { requirePermission } from '../middleware/permissions';
+import { applyRules } from '../../core/rules-engine';
+import { notifyUser } from './sse';
 
 const app = new Hono();
 
@@ -142,6 +145,52 @@ app.patch('/:id/unarchive', async (c) => {
     .update(emails)
     .set({ archived: false })
     .where(and(eq(emails.id, emailId), eq(emails.userId, sub)));
+
+  return c.json({ ok: true });
+});
+
+// ─── Classify email (external write-back) ───────────────────────────
+
+const classifyBodySchema = z.object({
+  category: z.enum(['action-required', 'fyi', 'meeting', 'newsletter', 'spam', 'automated']),
+  priority: z.number().min(0).max(10),
+  summary: z.string().optional(),
+  entities: z.object({
+    people: z.array(z.string()).optional(),
+    companies: z.array(z.string()).optional(),
+    dates: z.array(z.string()).optional(),
+    amounts: z.array(z.string()).optional(),
+  }).optional(),
+});
+
+app.patch('/:id/classify', requirePermission('write'), async (c) => {
+  const { sub } = c.get('user');
+  const emailId = c.req.param('id');
+  const body = classifyBodySchema.parse(await c.req.json());
+
+  const email = await db.query.emails.findFirst({
+    where: and(eq(emails.id, emailId), eq(emails.userId, sub)),
+  });
+
+  if (!email) return c.json({ error: 'Email not found' }, 404);
+
+  await db
+    .update(emails)
+    .set({
+      category: body.category,
+      priority: body.priority,
+      summary: body.summary,
+      entities: body.entities,
+      processedAt: new Date(),
+    })
+    .where(eq(emails.id, emailId));
+
+  notifyUser(sub, {
+    type: 'email_classified',
+    data: { emailId, category: body.category, priority: body.priority, method: 'external' },
+  });
+
+  await applyRules(emailId, sub);
 
   return c.json({ ok: true });
 });

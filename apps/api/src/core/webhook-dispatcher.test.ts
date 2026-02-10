@@ -51,10 +51,10 @@ describe('webhook-dispatcher', () => {
     expect(url).toBe('https://example.com/webhook');
     expect(options.method).toBe('POST');
     expect(options.headers['Content-Type']).toBe('application/json');
-    expect(options.headers['X-MailGate-Event']).toBe('email.filtered');
-    expect(options.headers['X-MailGate-Signature']).toBeDefined();
-    expect(typeof options.headers['X-MailGate-Signature']).toBe('string');
-    expect(options.headers['X-MailGate-Signature'].length).toBe(64); // SHA-256 hex = 64 chars
+    expect(options.headers['X-Mailgate-Event']).toBe('email.filtered');
+    expect(options.headers['X-Mailgate-Signature']).toBeDefined();
+    expect(typeof options.headers['X-Mailgate-Signature']).toBe('string');
+    expect(options.headers['X-Mailgate-Signature'].length).toBe(64); // SHA-256 hex = 64 chars
 
     const sentBody = JSON.parse(options.body);
     expect(sentBody.event).toBe('email.filtered');
@@ -65,7 +65,7 @@ describe('webhook-dispatcher', () => {
   test('generates valid HMAC-SHA256 signature', async () => {
     let capturedSignature = '';
     const fetchMock = mock((url: string, opts: any) => {
-      capturedSignature = opts.headers['X-MailGate-Signature'];
+      capturedSignature = opts.headers['X-Mailgate-Signature'];
       return Promise.resolve(new Response('OK', { status: 200 }));
     });
     globalThis.fetch = fetchMock as any;
@@ -79,7 +79,7 @@ describe('webhook-dispatcher', () => {
     // Verify reproducibility: same payload + secret = same signature
     await dispatchWebhook('https://example.com/webhook', payload, 'my-secret');
     const secondSignature =
-      fetchMock.mock.calls[1][1].headers['X-MailGate-Signature'];
+      fetchMock.mock.calls[1][1].headers['X-Mailgate-Signature'];
     expect(secondSignature).toBe(capturedSignature);
   });
 
@@ -141,7 +141,7 @@ describe('webhook-dispatcher', () => {
   test('uses custom secret when provided', async () => {
     const signatures: string[] = [];
     const fetchMock = mock((_url: string, opts: any) => {
-      signatures.push(opts.headers['X-MailGate-Signature']);
+      signatures.push(opts.headers['X-Mailgate-Signature']);
       return Promise.resolve(new Response('OK', { status: 200 }));
     });
     globalThis.fetch = fetchMock as any;

@@ -33,7 +33,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-bold text-brand-600">
-            MailGate.ai
+            Mailgate.ai
           </Link>
           <h1 className="mt-6 text-2xl font-bold">Welcome back</h1>
           <p className="mt-2 text-sm text-gray-600">Log in to your developer portal</p>

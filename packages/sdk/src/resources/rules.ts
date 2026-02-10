@@ -1,8 +1,8 @@
-import type { MailGateClient } from '../client';
+import type { MailgateClient } from '../client';
 import type { Rule, FilteringRule } from '../types';
 
 export class RulesResource {
-  constructor(private client: MailGateClient) {}
+  constructor(private client: MailgateClient) {}
 
   async list() {
     return this.client.request<{ rules: Rule[] }>('/api/rules');

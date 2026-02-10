@@ -1,5 +1,5 @@
 import {
-  MailGateClient,
+  MailgateClient,
   AuthResource,
   AccountsResource,
   ApiKeysResource,
@@ -8,7 +8,7 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
 
-const client = new MailGateClient({ baseUrl: API_URL });
+const client = new MailgateClient({ baseUrl: API_URL });
 const authResource = new AuthResource(client);
 const accountsResource = new AccountsResource(client);
 const apiKeysResource = new ApiKeysResource(client);

@@ -1,15 +1,15 @@
-export interface MailGateClientOptions {
+export interface MailgateClientOptions {
   baseUrl: string;
   apiKey?: string;
   bearerToken?: string;
 }
 
-export class MailGateClient {
+export class MailgateClient {
   private baseUrl: string;
   private apiKey?: string;
   private bearerToken?: string;
 
-  constructor(options: MailGateClientOptions) {
+  constructor(options: MailgateClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.apiKey = options.apiKey;
     this.bearerToken = options.bearerToken;

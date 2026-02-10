@@ -15,7 +15,13 @@ export function useSSE(onEvent: (event: { type: string; data: any }) => void) {
     eventSourceRef.current = es;
 
     es.addEventListener('new_email', (e) => {
-      onEvent({ type: 'new_email', data: JSON.parse(e.data) });
+      const data = JSON.parse(e.data);
+      onEvent({ type: 'new_email', data });
+
+      // Auto-classify new emails via local AI route
+      api.classifyEmail(data.id).catch((err) =>
+        console.warn('Auto-classify failed:', err)
+      );
     });
 
     es.addEventListener('draft_ready', (e) => {

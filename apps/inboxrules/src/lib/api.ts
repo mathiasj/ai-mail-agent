@@ -1,8 +1,8 @@
-import { MailGateClient, AuthResource, EmailsResource, DraftsResource, RulesResource } from '@mailgate/sdk';
+import { MailgateClient, AuthResource, EmailsResource, DraftsResource, RulesResource } from '@mailgate/sdk';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
 
-const client = new MailGateClient({ baseUrl: API_URL });
+const client = new MailgateClient({ baseUrl: API_URL });
 const authResource = new AuthResource(client);
 const emailsResource = new EmailsResource(client);
 const draftsResource = new DraftsResource(client);
@@ -98,9 +98,30 @@ class ApiClient {
     return this.wrapRequest(() => emailsResource.getStats());
   }
 
+  // AI (local routes → Inboxrules API → Mailgate)
+  async classifyEmail(emailId: string) {
+    return this.wrapRequest(async () => {
+      const res = await fetch('/api/ai/classify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailId }),
+      });
+      if (!res.ok) throw new Error('Classification failed');
+      return res.json();
+    });
+  }
+
   // Drafts
   async generateDraft(emailId: string, template?: string) {
-    return this.wrapRequest(() => draftsResource.generate(emailId, template));
+    return this.wrapRequest(async () => {
+      const res = await fetch('/api/ai/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailId, template }),
+      });
+      if (!res.ok) throw new Error('Draft generation failed');
+      return res.json();
+    });
   }
 
   async getDrafts() {

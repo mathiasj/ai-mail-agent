@@ -6,32 +6,6 @@ import { describe, test, expect } from 'bun:test';
 import { mock } from 'bun:test';
 
 mock.module('../db/client', () => ({ db: {} }));
-mock.module('../config/env', () => ({
-  env: {
-    OPENAI_API_KEY: 'test-key',
-    DATABASE_URL: 'postgres://test:test@localhost:5432/test',
-    REDIS_URL: 'redis://localhost:6379',
-    JWT_SECRET: 'test-jwt-secret-at-least-16-chars',
-  },
-}));
-mock.module('openai', () => ({
-  default: class {
-    chat = { completions: { create: mock() } };
-  },
-}));
-mock.module('./queue', () => ({
-  redisConnection: {},
-  draftQueue: { add: mock() },
-}));
-mock.module('bullmq', () => ({
-  Worker: class {
-    constructor(_name: string, _processor: Function, _opts: any) {}
-    on() { return this; }
-  },
-  Queue: class {
-    add = mock();
-  },
-}));
 mock.module('../auth/gmail-oauth', () => ({
   getAccessToken: mock(),
   getGmailClient: mock(),
