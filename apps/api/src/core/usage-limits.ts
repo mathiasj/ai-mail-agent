@@ -1,6 +1,6 @@
 import { eq, and, gte, sql } from 'drizzle-orm';
 import { db } from '../db/client';
-import { users, gmailAccounts, emails, drafts } from '../db/schema';
+import { users, gmailAccounts, emails, drafts, apiKeys } from '../db/schema';
 
 export interface TierLimits {
   maxAccounts: number;
@@ -101,6 +101,15 @@ export async function checkCanGenerateDraft(userId: string, tier: string): Promi
   const limits = getTierLimits(tier);
   const usage = await getUsage(userId);
   return usage.draftsThisMonth < limits.draftsPerMonth;
+}
+
+export async function checkCanCreateApiKey(userId: string, tier: string): Promise<boolean> {
+  const limits = getTierLimits(tier);
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(apiKeys)
+    .where(and(eq(apiKeys.userId, userId), sql`${apiKeys.revokedAt} IS NULL`));
+  return Number(result.count) < limits.maxApiKeys;
 }
 
 export async function checkCanAutoReply(tier: string): Promise<boolean> {

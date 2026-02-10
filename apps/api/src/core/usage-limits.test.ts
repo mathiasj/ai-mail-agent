@@ -1,5 +1,10 @@
-import { describe, test, expect } from 'bun:test';
-import { getTierLimits, checkCanAutoReply } from './usage-limits';
+import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { createMockDb } from '../__test-utils__/db-mock';
+
+const mockDb = createMockDb();
+mock.module('../db/client', () => ({ db: mockDb }));
+
+const { getTierLimits, checkCanAutoReply, checkCanCreateApiKey } = await import('./usage-limits');
 
 describe('getTierLimits', () => {
   test('free tier has correct limits', () => {
@@ -62,5 +67,44 @@ describe('checkCanAutoReply', () => {
 
   test('returns true for enterprise tier', async () => {
     expect(await checkCanAutoReply('enterprise')).toBe(true);
+  });
+});
+
+describe('checkCanCreateApiKey', () => {
+  function mockApiKeyCount(count: number) {
+    const chain = {
+      from: mock(() => chain),
+      where: mock(() => [{ count }]),
+    };
+    mockDb.select.mockReturnValue(chain as any);
+  }
+
+  beforeEach(() => {
+    mockDb.select.mockReset();
+  });
+
+  test('returns true when under limit (free tier, 0 keys)', async () => {
+    mockApiKeyCount(0);
+    expect(await checkCanCreateApiKey('user-1', 'free')).toBe(true);
+  });
+
+  test('returns false when at limit (free tier, 1 key)', async () => {
+    mockApiKeyCount(1);
+    expect(await checkCanCreateApiKey('user-1', 'free')).toBe(false);
+  });
+
+  test('returns true when under limit (starter tier, 4 keys)', async () => {
+    mockApiKeyCount(4);
+    expect(await checkCanCreateApiKey('user-1', 'starter')).toBe(true);
+  });
+
+  test('returns false when at limit (starter tier, 5 keys)', async () => {
+    mockApiKeyCount(5);
+    expect(await checkCanCreateApiKey('user-1', 'starter')).toBe(false);
+  });
+
+  test('returns true for pro tier (unlimited)', async () => {
+    mockApiKeyCount(100);
+    expect(await checkCanCreateApiKey('user-1', 'pro')).toBe(true);
   });
 });
