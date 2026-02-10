@@ -8,6 +8,7 @@ interface User {
   email: string;
   name?: string;
   tier: string;
+  webhookSecret?: string;
 }
 
 interface AuthContextValue {
@@ -16,6 +17,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue>({
@@ -24,6 +26,7 @@ export const AuthContext = createContext<AuthContextValue>({
   login: async () => {},
   signup: async () => {},
   logout: () => {},
+  refreshUser: async () => {},
 });
 
 export function useAuth() {
@@ -64,5 +67,10 @@ export function useAuthProvider(): AuthContextValue {
     setUser(null);
   }, []);
 
-  return { user, loading, login, signup, logout };
+  const refreshUser = useCallback(async () => {
+    const data = await dashboardApi.getMe();
+    setUser(data.user);
+  }, []);
+
+  return { user, loading, login, signup, logout, refreshUser };
 }

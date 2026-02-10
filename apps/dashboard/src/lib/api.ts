@@ -70,6 +70,10 @@ class DashboardApi {
     return this.wrapRequest(() => authResource.getMe());
   }
 
+  async regenerateWebhookSecret() {
+    return this.wrapRequest(() => authResource.regenerateWebhookSecret());
+  }
+
   // Accounts
   async getAccounts() {
     return this.wrapRequest(() => accountsResource.list());

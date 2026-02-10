@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, timestamp, integer, boolean, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 // ─── Users ───────────────────────────────────────────────────────────
 
@@ -12,6 +12,7 @@ export const users = pgTable('users', {
   dashboardTier: text('dashboard_tier').notNull().default('free'), // free, pro, team, enterprise
   stripeInboxrulesCustomerId: text('stripe_inboxrules_customer_id'),
   stripeDashboardCustomerId: text('stripe_dashboard_customer_id'),
+  webhookSecret: text('webhook_secret').default(sql`gen_random_uuid()`),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

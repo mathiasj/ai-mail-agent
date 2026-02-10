@@ -70,6 +70,10 @@ const worker = new Worker(
 
       // Dispatch webhook if configured on the matching rule
       if (filterResult.actions?.webhook) {
+        const webhookUser = await db.query.users.findFirst({
+          where: eq(users.id, userId),
+        });
+
         const webhookPayload: WebhookPayload = {
           event: 'email.filtered',
           timestamp: new Date().toISOString(),
@@ -88,7 +92,7 @@ const worker = new Worker(
             ? { id: filterResult.ruleId, name: filterResult.ruleName! }
             : undefined,
         };
-        dispatchWebhook(filterResult.actions.webhook, webhookPayload).catch((err) =>
+        dispatchWebhook(filterResult.actions.webhook, webhookPayload, webhookUser?.webhookSecret ?? undefined).catch((err) =>
           console.error('Webhook dispatch error:', err)
         );
       }

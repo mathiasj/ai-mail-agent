@@ -33,4 +33,10 @@ export class AuthResource {
   async disconnectGmailAccount(id: string) {
     return this.client.request(`/api/auth/gmail/accounts/${id}`, { method: 'DELETE' });
   }
+
+  async regenerateWebhookSecret() {
+    return this.client.request<{ webhookSecret: string }>('/api/auth/webhook-secret/regenerate', {
+      method: 'POST',
+    });
+  }
 }

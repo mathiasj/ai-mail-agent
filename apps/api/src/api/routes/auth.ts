@@ -51,7 +51,7 @@ app.post('/signup', async (c) => {
 
   const [user] = await db
     .insert(users)
-    .values({ email, passwordHash, name })
+    .values({ email, passwordHash, name, webhookSecret: crypto.randomUUID() })
     .returning({ id: users.id, email: users.email, tier: users.inboxrulesTier });
 
   const token = await signToken({
@@ -103,11 +103,25 @@ app.get('/me', authMiddleware, async (c) => {
   const { sub } = c.get('user');
   const user = await db.query.users.findFirst({
     where: eq(users.id, sub),
-    columns: { id: true, email: true, name: true, inboxrulesTier: true, createdAt: true },
+    columns: { id: true, email: true, name: true, inboxrulesTier: true, webhookSecret: true, createdAt: true },
   });
 
   if (!user) return c.json({ error: 'User not found' }, 404);
   return c.json({ user: { ...user, tier: user.inboxrulesTier } });
+});
+
+// ─── Regenerate Webhook Secret ───────────────────────────────────────
+
+app.post('/webhook-secret/regenerate', authMiddleware, async (c) => {
+  const { sub } = c.get('user');
+  const newSecret = crypto.randomUUID();
+
+  await db
+    .update(users)
+    .set({ webhookSecret: newSecret, updatedAt: new Date() })
+    .where(eq(users.id, sub));
+
+  return c.json({ webhookSecret: newSecret });
 });
 
 // ─── SSE Token Exchange ──────────────────────────────────────────────

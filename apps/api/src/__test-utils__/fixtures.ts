@@ -20,6 +20,7 @@ export function makeUser(overrides: Record<string, unknown> = {}) {
     dashboardTier: 'free' as string,
     stripeInboxrulesCustomerId: null,
     stripeDashboardCustomerId: null,
+    webhookSecret: 'whsec_test_' + id,
     createdAt: new Date('2025-01-01'),
     updatedAt: new Date('2025-01-01'),
     ...overrides,
