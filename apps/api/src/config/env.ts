@@ -50,8 +50,8 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().default(''),
   STRIPE_WEBHOOK_SECRET: z.string().default(''),
   WEBHOOK_SECRET: z.string().default('whsec_dev_default'),
+  STRIPE_PRICE_STARTER: z.string().default(''),
   STRIPE_PRICE_PRO: z.string().default(''),
-  STRIPE_PRICE_TEAM: z.string().default(''),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 

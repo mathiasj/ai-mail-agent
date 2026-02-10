@@ -10,8 +10,8 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 const app = new Hono();
 
 const TIER_PRICES: Record<string, string> = {
+  starter: env.STRIPE_PRICE_STARTER,
   pro: env.STRIPE_PRICE_PRO,
-  team: env.STRIPE_PRICE_TEAM,
 };
 
 // ─── Create checkout session ─────────────────────────────────────────

@@ -19,13 +19,13 @@ export default function BillingPage() {
     window.location.href = url;
   }
 
-  async function upgradeToPro() {
-    const { url } = await dashboardApi.createCheckout('pro');
+  async function upgradeToStarter() {
+    const { url } = await dashboardApi.createCheckout('starter');
     if (url) window.location.href = url;
   }
 
-  async function upgradeToTeam() {
-    const { url } = await dashboardApi.createCheckout('team');
+  async function upgradeToPro() {
+    const { url } = await dashboardApi.createCheckout('pro');
     if (url) window.location.href = url;
   }
 
@@ -70,16 +70,16 @@ export default function BillingPage() {
             </p>
             <div className="flex gap-3">
               <button
-                onClick={upgradeToPro}
+                onClick={upgradeToStarter}
                 className="px-4 py-2 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 transition"
               >
-                Upgrade to Pro
+                Upgrade to Starter — $49/yr
               </button>
               <button
-                onClick={upgradeToTeam}
+                onClick={upgradeToPro}
                 className="px-4 py-2 border text-sm rounded-lg hover:bg-gray-50 transition"
               >
-                Upgrade to Team
+                Upgrade to Pro — $190/yr
               </button>
             </div>
           </div>

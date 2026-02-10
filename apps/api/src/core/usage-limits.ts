@@ -4,6 +4,7 @@ import { users, gmailAccounts, emails, drafts } from '../db/schema';
 
 export interface TierLimits {
   maxAccounts: number;
+  maxApiKeys: number;
   emailsPerMonth: number;
   draftsPerMonth: number;
   autoReply: boolean;
@@ -13,20 +14,23 @@ export interface TierLimits {
 const TIER_LIMITS: Record<string, TierLimits> = {
   free: {
     maxAccounts: 1,
+    maxApiKeys: 1,
     emailsPerMonth: 100,
     draftsPerMonth: 10,
     autoReply: false,
     retentionDays: 30,
   },
-  pro: {
+  starter: {
     maxAccounts: 3,
+    maxApiKeys: 5,
     emailsPerMonth: 1000,
     draftsPerMonth: 100,
     autoReply: true,
     retentionDays: 90,
   },
-  team: {
+  pro: {
     maxAccounts: 10,
+    maxApiKeys: 999999, // Unlimited
     emailsPerMonth: 10000,
     draftsPerMonth: 999999, // Unlimited
     autoReply: true,
@@ -34,6 +38,7 @@ const TIER_LIMITS: Record<string, TierLimits> = {
   },
   enterprise: {
     maxAccounts: 999999,
+    maxApiKeys: 999999,
     emailsPerMonth: 999999,
     draftsPerMonth: 999999,
     autoReply: true,

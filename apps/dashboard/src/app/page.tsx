@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import PricingSection from '@/components/pricing-section';
 
 const features = [
   {
@@ -135,6 +136,9 @@ export default function DashboardLandingPage() {
             <a href='#features' className='text-sm text-gray-600 hover:text-gray-900'>
               Features
             </a>
+            <a href='#pricing' className='text-sm text-gray-600 hover:text-gray-900'>
+              Pricing
+            </a>
             <a href='#integrations' className='text-sm text-gray-600 hover:text-gray-900'>
               Integrations
             </a>
@@ -205,6 +209,8 @@ export default function DashboardLandingPage() {
           ))}
         </div>
       </section>
+
+      <PricingSection />
 
       {/* Security Trust Section */}
       <section id='security' className='bg-gray-50 py-24'>

@@ -5,25 +5,29 @@ describe('getTierLimits', () => {
   test('free tier has correct limits', () => {
     const limits = getTierLimits('free');
     expect(limits.maxAccounts).toBe(1);
+    expect(limits.maxApiKeys).toBe(1);
     expect(limits.emailsPerMonth).toBe(100);
     expect(limits.draftsPerMonth).toBe(10);
     expect(limits.autoReply).toBe(false);
     expect(limits.retentionDays).toBe(30);
   });
 
-  test('pro tier has correct limits', () => {
-    const limits = getTierLimits('pro');
+  test('starter tier has correct limits', () => {
+    const limits = getTierLimits('starter');
     expect(limits.maxAccounts).toBe(3);
+    expect(limits.maxApiKeys).toBe(5);
     expect(limits.emailsPerMonth).toBe(1000);
     expect(limits.draftsPerMonth).toBe(100);
     expect(limits.autoReply).toBe(true);
     expect(limits.retentionDays).toBe(90);
   });
 
-  test('team tier has correct limits', () => {
-    const limits = getTierLimits('team');
+  test('pro tier has correct limits', () => {
+    const limits = getTierLimits('pro');
     expect(limits.maxAccounts).toBe(10);
+    expect(limits.maxApiKeys).toBe(999999);
     expect(limits.emailsPerMonth).toBe(10000);
+    expect(limits.draftsPerMonth).toBe(999999);
     expect(limits.autoReply).toBe(true);
     expect(limits.retentionDays).toBe(365);
   });
@@ -31,6 +35,7 @@ describe('getTierLimits', () => {
   test('enterprise tier has correct limits', () => {
     const limits = getTierLimits('enterprise');
     expect(limits.maxAccounts).toBe(999999);
+    expect(limits.maxApiKeys).toBe(999999);
     expect(limits.emailsPerMonth).toBe(999999);
     expect(limits.autoReply).toBe(true);
     expect(limits.retentionDays).toBe(999999);
@@ -47,12 +52,12 @@ describe('checkCanAutoReply', () => {
     expect(await checkCanAutoReply('free')).toBe(false);
   });
 
-  test('returns true for pro tier', async () => {
-    expect(await checkCanAutoReply('pro')).toBe(true);
+  test('returns true for starter tier', async () => {
+    expect(await checkCanAutoReply('starter')).toBe(true);
   });
 
-  test('returns true for team tier', async () => {
-    expect(await checkCanAutoReply('team')).toBe(true);
+  test('returns true for pro tier', async () => {
+    expect(await checkCanAutoReply('pro')).toBe(true);
   });
 
   test('returns true for enterprise tier', async () => {
